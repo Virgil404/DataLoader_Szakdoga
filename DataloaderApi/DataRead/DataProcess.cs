@@ -22,7 +22,7 @@ public class DataProcess
 
     public void readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
-        if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType))
+        if (!ModelMap.TryGetValue(tableName, out Type modelType))
         {
             Console.WriteLine($"Error: No model found for table '{tableName}'");
             return;
