@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLoader", "DataLoader\Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataloaderApi", "DataloaderApi\DataloaderApi.csproj", "{FA6773AE-C73C-41B6-8AF9-75519360096A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOlib", "DTOlib\DTOlib.csproj", "{69D642AF-44FA-4AEF-BAD0-1728EE4EEC6E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataloader.Api.DTO", "Dataloader.Api.DTO\Dataloader.Api.DTO.csproj", "{BAC37C42-2331-421D-BFDD-A5BD73241E5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{FA6773AE-C73C-41B6-8AF9-75519360096A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA6773AE-C73C-41B6-8AF9-75519360096A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA6773AE-C73C-41B6-8AF9-75519360096A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69D642AF-44FA-4AEF-BAD0-1728EE4EEC6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69D642AF-44FA-4AEF-BAD0-1728EE4EEC6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69D642AF-44FA-4AEF-BAD0-1728EE4EEC6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69D642AF-44FA-4AEF-BAD0-1728EE4EEC6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC37C42-2331-421D-BFDD-A5BD73241E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAC37C42-2331-421D-BFDD-A5BD73241E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAC37C42-2331-421D-BFDD-A5BD73241E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC37C42-2331-421D-BFDD-A5BD73241E5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

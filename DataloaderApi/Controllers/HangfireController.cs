@@ -3,8 +3,7 @@ using Hangfire;
 using Hangfire.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
-using DataloaderApi.Data.DTO;
+using Dataloader.Api.DTO;
 namespace DataloaderApi.Controllers
 {
     [Route("api/[controller]")]
@@ -67,18 +66,23 @@ namespace DataloaderApi.Controllers
 
         }
 
+         
         [HttpGet("getRecurrningJobs")]
         public async Task<ActionResult<List<RecurringJobDto>>> getrecurringjobs()
         {
+
+           
             try {
             var joblist = new List<RecurringJobDto>();
-             var jobdtolist = new List<job>();
+             var jobdtolist = new List<TaskDTO>();
             joblist =  Hangfire.JobStorage.Current.GetConnection().GetRecurringJobs().ToList();
 
 
                 foreach (var job in joblist) {
 
-                    jobdtolist.Add(new Data.DTO.job(job.CreatedAt.ToString(), job.LastExecution.ToString(), job.NextExecution.ToString(), job.Id, job.Cron));
+
+                   
+                    jobdtolist.Add(new TaskDTO(job.CreatedAt.ToString(),job.LastExecution.ToString(),job.NextExecution.ToString(),job.Id.ToString(), job.Cron.ToString()));
                 
                 }
 

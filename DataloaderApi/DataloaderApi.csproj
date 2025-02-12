@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DTOlib\DTOlib.csproj" />
+    <ProjectReference Include="..\Dataloader.Api.DTO\Dataloader.Api.DTO.csproj" />
   </ItemGroup>
 
 </Project>

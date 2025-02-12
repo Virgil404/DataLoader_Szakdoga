@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 namespace DataloaderApi.Dao
 {
     public class CsvLoaderDao<T>: ICsvLoadDao<T>
@@ -18,6 +17,8 @@ namespace DataloaderApi.Dao
 
             foreach (var item in dataModelList)
             {
+
+                
 
                 db.Add(item);
 
