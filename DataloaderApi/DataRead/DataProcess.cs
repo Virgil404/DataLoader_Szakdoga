@@ -22,10 +22,9 @@ public class DataProcess
 
     public void readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
-        try
-        if (!ModelMap.TryGetValue(tableName, out Type modelType))
-        {
-            if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType))
+        try { 
+        
+            if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType)) 
             {
                 Console.WriteLine($"Error: No model found for table '{tableName}'");
                 throw new Exception($"Error: No model found for table '{tableName}'");
@@ -40,8 +39,9 @@ public class DataProcess
 
             Console.WriteLine("Insert complete.");
 
+         
         }
-        catch (Exception ex) { throw ex ; }
+        catch  { throw  ; }
     }
 
 

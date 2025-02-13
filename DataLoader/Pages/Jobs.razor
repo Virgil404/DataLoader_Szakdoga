@@ -1,0 +1,53 @@
+﻿@page "/jobs"
+@inherits JobsBlazor 
+
+<h3>Create Jobs</h3>
+
+
+@if(alert){
+
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+	Task Created Successfully
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+}
+
+<div>
+
+ <div class="col-md">
+
+	 <label> JobName</label>
+	 <InputText @bind-Value="Jobname" DisplayName="Job Name"> </InputText>
+</div>
+<div class="col-md">
+	 <label> Cron </label>
+	 <InputText @bind-Value="cron" DisplayName="Cron"></InputText>
+</div>
+<div class="col-md">
+	 <label> FilePaht</label>
+	 <InputText @bind-Value="filepath"></InputText>
+</div>
+	 <label>Delimiter</label>
+	 <InputText @bind-Value="delimiter"> </InputText>
+<div class="col-md">
+	 <label> TableName</label>
+	 <InputText @bind-Value="tablename"></InputText>
+</div>
+<div class="col-md">
+	 <label> HasHeader</label>
+	 <InputCheckbox @bind-Value="hasheader" > hasheader </InputCheckbox>
+</div>
+
+	<div class="col-md-2">
+		<button type="button" class="btn btn-primary" @onclick="createTask">Create Task</button>
+	</div>
+</div>
+
+
+
+
+@code {
+
+}

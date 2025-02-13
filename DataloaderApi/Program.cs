@@ -3,6 +3,7 @@ using DataloaderApi.Dao;
 using DataloaderApi.DataRead;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 namespace DataloaderApi
 {
     public class Program
@@ -44,7 +45,12 @@ namespace DataloaderApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors(policy=>
+            policy.WithOrigins("https://localhost:7046", "http://localhost:7046")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
 
+                );
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
