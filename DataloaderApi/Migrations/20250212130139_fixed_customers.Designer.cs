@@ -4,6 +4,7 @@ using DataloaderApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataloaderApi.Migrations
 {
     [DbContext(typeof(Applicationcontext))]
-    partial class ApplicationcontextModelSnapshot : ModelSnapshot
+    [Migration("20250212130139_fixed_customers")]
+    partial class fixed_customers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,16 +33,16 @@ namespace DataloaderApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DR_NO"));
 
-                    b.Property<int?>("AREA")
+                    b.Property<int>("AREA")
                         .HasColumnType("int");
 
                     b.Property<string>("AREANAME")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CrmCd")
+                    b.Property<int>("CrmCd")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CrmCd1")
+                    b.Property<int>("CrmCd1")
                         .HasColumnType("int");
 
                     b.Property<int?>("CrmCd2")
@@ -57,34 +60,34 @@ namespace DataloaderApi.Migrations
                     b.Property<string>("CrossStreet")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("DATEOCC")
+                    b.Property<DateTime>("DATEOCC")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateRptd")
+                    b.Property<DateTime>("DateRptd")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("LAT")
+                    b.Property<double>("LAT")
                         .HasColumnType("float");
 
                     b.Property<string>("LOCATION")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("LON")
+                    b.Property<double>("LON")
                         .HasColumnType("float");
 
                     b.Property<string>("Mocodes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Part1_2")
+                    b.Property<int>("Part1_2")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PremisCd")
+                    b.Property<int>("PremisCd")
                         .HasColumnType("int");
 
                     b.Property<string>("PremisDesc")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RptDistNo")
+                    b.Property<int>("RptDistNo")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -94,10 +97,10 @@ namespace DataloaderApi.Migrations
                     b.Property<string>("StatusDesc")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TIMEOCC")
+                    b.Property<int>("TIMEOCC")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VictAge")
+                    b.Property<int>("VictAge")
                         .HasColumnType("int");
 
                     b.Property<string>("VictDescent")

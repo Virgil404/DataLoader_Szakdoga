@@ -23,6 +23,7 @@ public class DataProcess
     public void readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
         try
+        if (!ModelMap.TryGetValue(tableName, out Type modelType))
         {
             if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType))
             {
