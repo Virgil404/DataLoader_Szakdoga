@@ -9,7 +9,7 @@ namespace DataloaderApi.Dao
         {
             _context = context;
         }
-        public void insertdataWithoutDelete(List<T> dataModelList)
+        public async void insertdataWithoutDelete(List<T> dataModelList)
         {
             using var db = _context;
 
@@ -20,7 +20,7 @@ namespace DataloaderApi.Dao
 
                 
 
-                db.Add(item);
+             db.Add(item);
 
             }
 
@@ -30,11 +30,11 @@ namespace DataloaderApi.Dao
 
         }
 
-        public void insertdataWithDelete(List<T> dataModelList, string tableName)
+        public async void insertdataWithDelete(List<T> dataModelList, string tableName)
         {
             using var db = _context;
 
-            deletebasedonTableName(tableName);
+             deletebasedonTableName(tableName);
 
 
           //  db.AddRangeAsync(dataModelList);
@@ -43,15 +43,15 @@ namespace DataloaderApi.Dao
             foreach (var item in dataModelList)
             {
 
-                db.Add(item);
+               db.Add(item);
 
             }
            
 
-            db.SaveChanges() ;
+                  db.SaveChanges() ;
         }
 
-        public void deletebasedonTableName(string tableName)
+        public async void deletebasedonTableName(string tableName)
         {
             using var db = _context;
 

@@ -18,12 +18,17 @@ namespace DataloaderApi.Controllers
             _dataProcess = dataProcess;
         }
 
-        private void CreateRecurringJob(string cron, string jobname, string filepath, string delimiter, bool hasheader, string tableName)
+        private async void CreateRecurringJob(string cron, string jobname, string filepath, string delimiter, bool hasheader, string tableName)
         {
-
-            Console.WriteLine(jobname + " started");
-            RecurringJob.AddOrUpdate(jobname, () => _dataProcess.readAndInsert(filepath, delimiter, hasheader, tableName), cron);
-
+            try
+            {
+                Console.WriteLine(jobname + " started");
+                RecurringJob.AddOrUpdate(jobname, () => _dataProcess.readAndInsert(filepath, delimiter, hasheader, tableName), cron);
+            }
+            catch (Exception ex) {
+                throw ex;
+                    
+                 }
 
         }
 
@@ -40,11 +45,11 @@ namespace DataloaderApi.Controllers
         {
             try {
                 CreateRecurringJob(cron, jobname, filePath, delimiter, hasheader, tableName);
-                return Ok();
+                return Ok("Task Created");
             }
-            catch {
+            catch (Exception ex) {
 
-                return BadRequest();
+                return BadRequest("Error While Creating Task "+ ex.ToString());
             }
 
         }
@@ -56,12 +61,12 @@ namespace DataloaderApi.Controllers
             try
             {
                 CreateRecurringJobWithoutDelete(cron, jobname, filePath, delimiter, hasheader, tableName);
-                return Ok();
+                return Ok("Task Created");
             }
             catch
             {
 
-                return BadRequest();
+                return BadRequest("Error While Creating Task");
             }
 
         }
@@ -89,7 +94,7 @@ namespace DataloaderApi.Controllers
             return Ok(jobdtolist);
 
             }
-            catch { return BadRequest(); }
+            catch { return BadRequest("Error While Returning Task"); }
 
         }
 
@@ -99,12 +104,13 @@ namespace DataloaderApi.Controllers
         {
             try
             {
+               
                 RecurringJob.RemoveIfExists(taskid);
                 Console.WriteLine("Task Deleted");
                 return Ok();
             }
             catch {
-                return BadRequest();
+                return BadRequest("Deleting Task Failed");
             }
         }
 
@@ -116,13 +122,13 @@ namespace DataloaderApi.Controllers
             {
 
                 RecurringJob.TriggerJob(taskid);
-                return Ok();
+                return Ok("Task Triggered");
 
             }
             catch
             {
 
-                return BadRequest();
+                return BadRequest("Failed To Trigger Task");
 
             }
         }

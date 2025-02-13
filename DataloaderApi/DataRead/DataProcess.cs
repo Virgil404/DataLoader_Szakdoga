@@ -22,20 +22,25 @@ public class DataProcess
 
     public void readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
-        if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType))
+        try
         {
-            Console.WriteLine($"Error: No model found for table '{tableName}'");
-            return;
+            if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType))
+            {
+                Console.WriteLine($"Error: No model found for table '{tableName}'");
+                throw new Exception($"Error: No model found for table '{tableName}'");
+            }
+
+            dynamic dataReader = Activator.CreateInstance(typeof(DataReader<>).MakeGenericType(modelType));
+            var dataList = dataReader.readDataNewFile(filepath, delimiter, hasheader);
+
+            var dbHandler = _serviceProvider.GetRequiredService(typeof(ICsvLoadDao<>).MakeGenericType(modelType));
+
+            ((dynamic)dbHandler).insertdataWithDelete(dataList, tableName);
+
+            Console.WriteLine("Insert complete.");
+
         }
-
-        dynamic dataReader = Activator.CreateInstance(typeof(DataReader<>).MakeGenericType(modelType));
-        var dataList = dataReader.readDataNewFile(filepath, delimiter, hasheader);
-
-        var dbHandler = _serviceProvider.GetRequiredService(typeof(ICsvLoadDao<>).MakeGenericType(modelType));
-
-        ((dynamic)dbHandler).insertdataWithDelete(dataList,tableName);
-
-        Console.WriteLine("Insert complete.");
+        catch (Exception ex) { throw ex ; }
     }
 
 
