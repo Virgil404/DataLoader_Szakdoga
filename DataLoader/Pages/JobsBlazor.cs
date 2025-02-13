@@ -36,13 +36,19 @@ namespace DataLoader.Pages
         {
             if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) { 
             
-                alert = true;
                 return ;    
             }
 
            await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, hasheader, tablename);
+            alert = true;
         }
 
+
+        public void setAlert()
+        {
+
+            alert = false;
+        }
 
 
 
