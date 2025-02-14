@@ -3,6 +3,7 @@ using DataloaderApi.Dao;
 using DataloaderApi.DataRead;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 namespace DataloaderApi
 {
     public class Program
@@ -36,6 +37,15 @@ namespace DataloaderApi
 
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped<DataProcess>();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins", policy =>
+                    policy.WithOrigins("https://localhost:7046", "http://localhost:7046")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -45,6 +55,7 @@ namespace DataloaderApi
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowSpecificOrigins");
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

@@ -15,6 +15,8 @@
 
         }
 
+        public TaskDTO() { }
+
 
         public string CratedAt { get; set; }
         public string LastExecution { get; set; }
