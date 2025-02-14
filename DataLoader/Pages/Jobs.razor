@@ -14,6 +14,27 @@
 </div>
 }
 
+@if(BadAlert){
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+	Please fill all the fields 
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="setBadAlert">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+
+}
+
+
+@if(retriggerlert){
+
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		Task Triggered
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="setRetriggerAlert">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+}
+
 <div>
 
  <div class="col-md">
@@ -45,7 +66,47 @@
 	</div>
 </div>
 
+<button class="btn btn-primary" @onclick="RefreshList">Refresh List</button>
 
+<table class="table table-bordered table-hover">
+	
+	<thead>
+		<tr>
+			<th scope="col">Name</th>
+			<th scope="col">Cron</th>
+			<th scope="col">Created At</th>
+			<th scope="col">Last Execution</th>
+			<th scope="col">Next Execution</th>
+			<th scope="col">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+
+		@if (tasks != null)
+		{
+			@foreach (var task in tasks)
+			{
+				<tr>
+					<td>@task.JobID</td>
+					<td>@task.Cron</td>
+					<td>@task.CratedAt</td>
+					<td>@task.LastExecution</td>
+					<td>@task.NextExecution</td>
+					<td>
+						<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>
+						<button type="button" class="btn btn-secondary" @onclick="()=> Trigger(task.JobID)">Trigger</button>
+					</td>
+				</tr>
+			}
+		}
+		else
+		{
+			<tr><td colspan="6">No jobs available</td></tr>
+		}
+
+		
+	</tbody>
+</table>
 
 
 @code {

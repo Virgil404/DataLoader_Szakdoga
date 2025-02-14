@@ -113,6 +113,8 @@ namespace DataLoader.Services
             }
         }
 
+
+        /*
         public async Task TriggerTask(string jobID)
         {
 
@@ -140,5 +142,30 @@ namespace DataLoader.Services
             catch(Exception) { throw; }
 
         }
+        */
+
+        public async Task TriggerTask(string jobID)
+        {
+            try
+            {
+                var url = $"api/Hangfire/triggerjob?taskid={Uri.EscapeDataString(jobID)}";
+
+                var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+
+                using var response = await httpClient.PostAsync(url, content);
+
+                Console.WriteLine("Response: " + response);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string error = response.ReasonPhrase;
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
