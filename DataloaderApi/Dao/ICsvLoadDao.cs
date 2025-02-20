@@ -18,5 +18,7 @@ namespace DataloaderApi.Dao
         public void deletebasedonTableName(string tableName)
         {
         }
+
+        public async Task insertWithSQLBULK(List<T> dataModelList, string table) { }
     }
 }

@@ -1,7 +1,10 @@
-﻿using DataloaderApi.Dao;
+﻿using System.Data;
+using System.Reflection;
+using DataloaderApi.Dao;
 using DataloaderApi.Data;
 using DataloaderApi.DataRead;
 using Microsoft.Extensions.DependencyInjection;
+
 
 public class DataProcess
 {
@@ -9,10 +12,10 @@ public class DataProcess
 
     private static readonly Dictionary<string, Type> ModelMap = new Dictionary<string, Type>
     {
-        { "crimeData", typeof(CrimeData) },
-        { "customers", typeof(Customers) },
-        { "organizations", typeof(Organizations) },
-        { "product", typeof(Product) },
+        { "CrimeData", typeof(CrimeData) },
+        { "Customers", typeof(Customers) },
+        { "Organizations", typeof(Organizations) },
+        { "Products", typeof(Product) },
     };
 
     public DataProcess(IServiceProvider serviceProvider)
@@ -20,11 +23,11 @@ public class DataProcess
         _serviceProvider = serviceProvider;
     }
 
-    public void readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
+    public async Task  readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
         try { 
         
-            if (!ModelMap.TryGetValue(tableName.ToLower(), out Type modelType)) 
+            if (!ModelMap.TryGetValue(tableName, out Type modelType)) 
             {
                 Console.WriteLine($"Error: No model found for table '{tableName}'");
                 throw new Exception($"Error: No model found for table '{tableName}'");
@@ -35,7 +38,7 @@ public class DataProcess
 
             var dbHandler = _serviceProvider.GetRequiredService(typeof(ICsvLoadDao<>).MakeGenericType(modelType));
 
-            ((dynamic)dbHandler).insertdataWithDelete(dataList, tableName);
+           await ((dynamic)dbHandler).insertWithSQLBULK(dataList, tableName);
 
             Console.WriteLine("Insert complete.");
 
@@ -64,4 +67,9 @@ public class DataProcess
         Console.WriteLine("Insert complete.");
 
     }
+
+
+    
+
+
 }

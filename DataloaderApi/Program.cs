@@ -35,6 +35,8 @@ namespace DataloaderApi
 
                 );
 
+            builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped<DataProcess>();
 
