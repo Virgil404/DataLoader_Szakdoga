@@ -21,11 +21,27 @@ namespace DataloaderApi.Auth
         {
 
             var AccessToken = GenerateAccessToken (user);
-
-            return new Token { AccesToken = AccessToken };
+            var reftoken = generateRefreshToken();
+            return new Token { AccesToken = AccessToken , RefreshToken = reftoken};
 
 
         }
+
+        private RefreshToken generateRefreshToken()
+        {
+            var reftoken = new RefreshToken
+            {   
+                Token = Guid.NewGuid().ToString(),
+                Expires = DateTime.Now.AddMonths(1),
+                CreatedDate = DateTime.Now,
+                enabled = true,
+
+            };
+
+            return reftoken;
+
+        }
+
 
         private string  GenerateAccessToken(User user)
         {
@@ -44,7 +60,7 @@ namespace DataloaderApi.Auth
 
                     ]
                  ),
-                 Expires = DateTime.UtcNow.AddMinutes (1),
+                 Expires = DateTime.UtcNow.AddMinutes (10),
                  SigningCredentials = credentials, 
                  Issuer = _configuration["JWT:Issuer"],
                  Audience = _configuration["JWT:Audience"]

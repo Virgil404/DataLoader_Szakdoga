@@ -25,5 +25,11 @@ namespace DataloaderApi.Data
 
         [Required]
         public string Role { get; set; }
+
+
+        // One-to-One Relationship with RefreshToken
+        public RefreshToken RefreshToken { get; set; }
+
+
     }
 }

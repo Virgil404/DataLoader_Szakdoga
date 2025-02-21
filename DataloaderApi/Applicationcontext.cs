@@ -20,6 +20,8 @@ namespace DataloaderApi
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -33,6 +35,12 @@ namespace DataloaderApi
 
 
             });
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.RefreshToken)    // User has one RefreshToken
+                .WithOne(rt => rt.User)        // RefreshToken has one User
+                .HasForeignKey<RefreshToken>(rt => rt.Username) // FK on RefreshToken
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

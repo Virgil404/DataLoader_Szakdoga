@@ -2,8 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Dataloader.Api.DTO;
 using DataloaderApi.Auth;
+using DataloaderApi.Data;
 namespace DataloaderApi.Controllers
 {
+
+    [Route("api/[controller]")]
+    [ApiController]
     public class AuthController : Controller
     {
      
@@ -127,9 +131,55 @@ namespace DataloaderApi.Controllers
             var token = _tokenProvider.GenerateToken(user);
             response.AccesToken = token.AccesToken;
 
+            response.RefreshToken = token.RefreshToken.Token;
+            await _authHandling.disableuserTokenByuserName(user.UserID);
+            await _authHandling.insertRefreshToken(token.RefreshToken, user.UserID);
+            
+
+            return Ok(response);
+
+        }
 
 
-            return response;
+        [HttpPost("refresh")]
+
+        public async Task<ActionResult<AuthResponse>> RefreshToken()
+        {
+            var response = new AuthResponse();
+
+            var refreshToken = Request.Cookies["refreshtoken"];
+
+            if (String.IsNullOrEmpty(refreshToken)) return BadRequest();
+
+            var isvalid = await _authHandling.isTokenValid(refreshToken);
+            if (!isvalid) return BadRequest();
+
+            var curruser = await _authHandling.findUserByToken(refreshToken);
+
+            if (curruser == null) return BadRequest();
+
+
+            var token = _tokenProvider.GenerateToken(curruser);
+            response.AccesToken = token.AccesToken;
+
+            response.RefreshToken = token.RefreshToken.Token;
+
+            await _authHandling.disableUserTokenByToken(token.RefreshToken.Token);
+
+            await _authHandling.insertRefreshToken(token.RefreshToken,curruser.UserID);
+
+            return Ok(response);
+        }
+
+        [HttpPost("logout")]
+
+        public async Task<ActionResult> logout()
+        {
+            var refreshToken = Request.Cookies["refreshtoken"];
+
+            if (refreshToken != null) _authHandling.disableUserTokenByToken(refreshToken);
+            return Ok();
+
 
         }
 
