@@ -4,6 +4,7 @@ using DataloaderApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataloaderApi.Migrations
 {
     [DbContext(typeof(Applicationcontext))]
-    partial class ApplicationcontextModelSnapshot : ModelSnapshot
+    [Migration("20250221080628_UserTablewithSeed")]
+    partial class UserTablewithSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,7 +276,7 @@ namespace DataloaderApi.Migrations
                         new
                         {
                             UserID = "Admin",
-                            Password = "$2a$11$0WZaQI.t68SRP7sBnBKFYe5mKMgLuLDQ2CyI5FnZWhBFVO/xRO6qS",
+                            Password = "$2a$11$PnY7LFHU6Gsi9WC3IPPv1OPRQF0vvRExLMOh1dxfUS.XhKvsZsLn.",
                             Role = "Admin"
                         });
                 });

@@ -1,8 +1,11 @@
 
+using System.Text;
 using DataloaderApi.Dao;
 using DataloaderApi.DataRead;
 using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 namespace DataloaderApi
 {
@@ -25,8 +28,27 @@ namespace DataloaderApi
                    
                   ); 
 
-              builder.Services.AddHangfireServer();
+            
+            // Authentication 
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
 
+            {
+                opt.RequireHttpsMetadata = true;
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
+                    ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidAudience = builder.Configuration["JWT:Audience"],
+                    ClockSkew = TimeSpan.Zero
+                };
+
+            });
+
+            
+            // Hangfire
+            builder.Services.AddHangfireServer();
             // db config hangfire
             builder.Services.AddDbContextPool<Applicationcontext>(options =>
 
@@ -35,9 +57,12 @@ namespace DataloaderApi
 
                 );
 
+
+            //Dependency Injection
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
+            builder.Services.AddScoped(typeof(IAuthHandling), typeof(AuthHandling));
             builder.Services.AddScoped<DataProcess>();
 
             builder.Services.AddCors(options =>
