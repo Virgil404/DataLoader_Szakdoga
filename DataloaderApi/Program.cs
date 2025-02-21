@@ -1,7 +1,9 @@
 
 using System.Text;
+using DataloaderApi.Auth;
 using DataloaderApi.Dao;
 using DataloaderApi.DataRead;
+using DataloaderApi.Extension;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +22,8 @@ namespace DataloaderApi
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerAuth();
+
             var connectionString = builder.Configuration.GetConnectionString("dataloaderConnection");
 
             builder.Services.AddHangfire(configuration => configuration      
@@ -62,8 +65,9 @@ namespace DataloaderApi
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
-            builder.Services.AddScoped(typeof(IAuthHandling), typeof(AuthHandling));
+            builder.Services.AddScoped(typeof(IAuthHandlingDao), typeof(AuthHandlingDao));
             builder.Services.AddScoped<DataProcess>();
+            builder.Services.AddScoped<TokenProvider>();
 
             builder.Services.AddCors(options =>
             {

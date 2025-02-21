@@ -1,18 +1,19 @@
 ﻿
+using System.Reflection.Metadata.Ecma335;
 using BCrypt.Net;
 using DataloaderApi.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataloaderApi.Dao
 {
-    public class AuthHandling : IAuthHandling
+    public class AuthHandlingDao : IAuthHandlingDao
 
 
     {
 
         private readonly Applicationcontext _context;
 
-        public AuthHandling(Applicationcontext context)
+        public AuthHandlingDao(Applicationcontext context)
         {
             _context = context;
         }
@@ -22,6 +23,15 @@ namespace DataloaderApi.Dao
 
             try
             {
+                var userExists = await userExitsWithUserName(username);
+
+                if (userExists) {
+                    Console.WriteLine("user Alredy exist");
+                    return false;
+                
+                }
+
+
                 var hashedpassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 var user = new User 
@@ -49,7 +59,7 @@ namespace DataloaderApi.Dao
         public async Task<bool> ChangePassword (string username,string Password)
         {
 
-            var user =  await _context.Users.FirstOrDefaultAsync(u=> u.UserID.Equals(username));
+            var user = await GetUserByUserName(username);
 
             if (user == null) 
             {
@@ -64,8 +74,8 @@ namespace DataloaderApi.Dao
 
         public async Task<bool> DeleteUser(string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID.Equals(username));
-            if (user == null)
+            var user = await GetUserByUserName(username);
+            if (user==null)
             {
                 Console.WriteLine("UserNotFound");
                 return false;
@@ -74,6 +84,24 @@ namespace DataloaderApi.Dao
             _context.Remove(user);
             _context.SaveChanges();
             return true;    
+        }
+
+
+
+
+
+        public async Task<bool> userExitsWithUserName(string username)
+        {
+            var userexist =  from u in _context.Users where u.UserID == username select u;
+            return  await userexist.AnyAsync();
+        }
+
+
+        public async Task<User>? GetUserByUserName(string username)
+        {
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID.Equals(username));
+            return user;
         }
 
 
