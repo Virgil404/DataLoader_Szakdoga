@@ -177,7 +177,7 @@ namespace DataloaderApi.Controllers
         {
             var refreshToken = Request.Cookies["refreshtoken"];
 
-            if (refreshToken != null) _authHandling.disableUserTokenByToken(refreshToken);
+            if (refreshToken != null) await _authHandling.disableUserTokenByToken(refreshToken);
             return Ok();
 
 

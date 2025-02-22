@@ -2,6 +2,7 @@ using DataLoader.Services;
 using DataLoader.Services.InterFaces;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 
 namespace DataLoader
 {
@@ -15,6 +16,8 @@ namespace DataLoader
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7186") });
             builder.Services.AddScoped<ITaskSchedulerService, TaskSchedulerService>();
+            builder.Services.AddScoped<IJSRuntime, JSRuntime>();
+            builder.Services.AddScoped<ICookiesService, Cookieservice>();
 
 
             await builder.Build().RunAsync();
