@@ -6,25 +6,28 @@ namespace DataLoader.Services
     {
 
         private readonly ICookiesService _cookiesService;
+        private readonly string tokenkey="access_token";
 
         public AccessTokenService(ICookiesService cookiesService)
         {
             _cookiesService = cookiesService;
         }
 
-        public Task<string> GetToken()
+        public async Task<string> GetToken()
         {
-            throw new NotImplementedException();
+            return await _cookiesService.GetCookie(tokenkey);
         }
 
-        public Task RemoveToken(string token)
+        public async Task RemoveToken(string token)
         {
-            throw new NotImplementedException();
+        
+            await _cookiesService.RemoveCookie(tokenkey);
+        
         }
 
-        public Task SetToken(string token)
+        public async Task SetToken(string token)
         {
-            throw new NotImplementedException();
+             await _cookiesService.SetCookie(tokenkey, token, 1);
         }
     }
 }

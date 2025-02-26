@@ -1,0 +1,80 @@
+﻿@page "/usermanager"
+@inherits UsermanagerBlazor
+@inject DialogService DialogService
+<h3>Create Users</h3>
+
+
+<div>
+
+	<div class="col-md">
+
+		<label> Username</label>
+		<InputText @bind-Value="username" DisplayName="userName"> </InputText>
+	</div>
+	<div class="col-md">
+		<label> Password </label>
+		<InputText @bind-Value="password" type="password" DisplayName="Cron"></InputText>
+	</div>
+	<div class="col-md">
+		<label> Role</label>
+		<InputText @bind-Value="role"></InputText>
+	</div>
+	<div class="col-md-2">
+		<button type="button" class="btn btn-primary" @onclick="CreateUser">Create User</button>
+	</div>
+</div>
+
+
+
+<button class="btn btn-primary" @onclick="RefreshList">Refresh List</button>
+
+<table class="table table-bordered table-hover">
+
+	<thead>
+		<tr>
+			<th scope="col">Name</th>
+			<th scope="col">Role</th>
+			<th scope="col">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+
+		@if (userlist != null)
+		{
+			@foreach (var user in userlist)
+			{
+				<tr>
+					<td>@user.username</td>
+					<td>@user.Role</td>
+					<td>
+
+						<RadzenButton Text="Delete User" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
+									  Click=@(async args =>
+							  {
+							  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete User",
+							  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+							  if (confirmed == true)
+							  {
+								Delete(user.username);
+								DialogService.Close();
+							  }
+							  else DialogService.Close();
+							  }) />
+
+
+						<RadzenButton Text="Change user Password" ButtonStyle="ButtonStyle.Primary" Click =@ShowInlineDialog></RadzenButton>
+						<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(user.username)">Delete</button>-->
+						<!--<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalCenter">Change Password</button>-->
+						
+					</td>
+				</tr>
+			}
+		}
+		else
+		{
+			<tr><td colspan="6">No jobs available</td></tr>
+		}
+
+	</tbody>
+</table>
+

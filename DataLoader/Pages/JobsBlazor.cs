@@ -2,6 +2,7 @@
 using DataLoader.Services;
 using DataLoader.Services.InterFaces;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
 namespace DataLoader.Pages
 {
@@ -9,7 +10,8 @@ namespace DataLoader.Pages
     {
         [Inject]
       public   ITaskSchedulerService taskSchedulerService { get; set; }
-
+        [Inject]
+        public NotificationService NotificationService { get; set; }
         public string Jobname { get; set; }
         public string cron {  get; set; }
         public string filepath { get; set; }
@@ -19,14 +21,25 @@ namespace DataLoader.Pages
 
         public bool alert { get; set; }
 
+        public string crontext { get; set; }
+
         public bool retriggerlert { get; set; }
         public  bool BadAlert {  get; set; } 
-        public bool hasheader { get; set; }
+        public bool UseCron { get; set; }
        public TaskDTO task { get; set;}
       public List<TaskDTO> tasks { get; set; }
 
-        
-        
+
+        public Dictionary<string, string> CronMap = new Dictionary<string, string>
+       {
+           {"every minute","* * * * *" },
+           {"every hour" , "0 * * * *"},
+           {"every day", "0 0 * * *"},
+           {"every week", "0 0 * * 0" },
+           {"every month", "0 0 1 * *" },
+           {"every year","0 0 1 1 *" }
+       };
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -38,36 +51,35 @@ namespace DataLoader.Pages
 
         public async Task createTask()
         {
-            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) { 
-            
-                BadAlert = true;
+            if (!UseCron)
+            {
+    
+                if(CronMap.TryGetValue(crontext, out string cronstring))
+                {
+                    cron=cronstring;
+
+                }
+
+                
+            }
+
+            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) {
+
+                NotificationService.Notify(new NotificationMessage
+                { Severity = NotificationSeverity.Success, Summary = "Task Not Created", 
+                    Detail = $"Please fill out all the fields", Duration = 6000 });
+
+                // BadAlert = true;
 
                 return ;    
             }
 
-           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, hasheader, tablename);
-            alert = true;
-        }
 
 
-        public void setAlert()
-        {
-
-            alert = false;
-        }
-
-        public void setBadAlert() 
-        { 
-            
-            BadAlert= false;
-        
-        }
-
-        public void setRetriggerAlert()
-        {
-
-            retriggerlert = false;
-
+           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename);
+            NotificationService.Notify(new NotificationMessage
+            { Severity = NotificationSeverity.Success, Summary = "Task Created Successfully", Detail = $"{Jobname} created successfully", Duration = 6000 });
+            //alert = true;
         }
 
 
@@ -91,7 +103,10 @@ namespace DataLoader.Pages
             await taskSchedulerService.TriggerTask(jobid);
             tasks = await taskSchedulerService.GetTasks();
             StateHasChanged();
-            retriggerlert= true;
+
+            NotificationService.Notify(new NotificationMessage
+            { Severity = NotificationSeverity.Success, Summary = "Task Triggered", Detail = $"{jobid} triggered succesfully", Duration = 6000 });
+            // retriggerlert= true;
 
         }
 

@@ -3,6 +3,8 @@ using System.Reflection.Metadata.Ecma335;
 using BCrypt.Net;
 using DataloaderApi.Data;
 using Microsoft.EntityFrameworkCore;
+using Dataloader.Api.DTO;
+using System.Linq;
 
 namespace DataloaderApi.Dao
 {
@@ -102,6 +104,28 @@ namespace DataloaderApi.Dao
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID.Equals(username));
             return user;
+        }
+
+
+        public async Task<List<UserDTO>> GetUsers()
+        {
+            var userlistdto = new List<UserDTO>();
+            var userlist = new List<User>();
+            userlist = _context.Users.ToList();
+
+            foreach (var user in userlist)
+            {
+                userlistdto.Add(new UserDTO
+                {
+                    username=user.UserID,
+                    Role=user.Role,
+
+                });
+
+            }
+
+            return userlistdto;
+
         }
 
 

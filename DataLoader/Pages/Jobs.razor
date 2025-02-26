@@ -1,39 +1,11 @@
 ﻿@page "/jobs"
 @inherits JobsBlazor 
+@inject DialogService DialogService
 
 <h3>Create Jobs</h3>
 
 
-@if(alert){
 
-	<div class="alert alert-success alert-dismissible fade show" role="alert">
-	Task Created Successfully
-	<button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="setAlert">
-		<span aria-hidden="true">&times;</span>
-	</button>
-</div>
-}
-
-@if(BadAlert){
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-	Please fill all the fields 
-		<button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="setBadAlert">
-		<span aria-hidden="true">&times;</span>
-	</button>
-</div>
-
-}
-
-
-@if(retriggerlert){
-
-	<div class="alert alert-success alert-dismissible fade show" role="alert">
-		Task Triggered
-		<button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="setRetriggerAlert">
-			<span aria-hidden="true">&times;</span>
-		</button>
-	</div>
-}
 
 <div>
 
@@ -42,12 +14,36 @@
 	 <label> JobName</label>
 	 <InputText @bind-Value="Jobname" DisplayName="Job Name"> </InputText>
 </div>
+
+	<div class="col-md">
+		<label> Use Cron</label>
+		<InputCheckbox @bind-Value="UseCron"> use Cron </InputCheckbox>
+	</div>
+
+@if(UseCron){
 <div class="col-md">
 	 <label> Cron </label>
 	 <InputText @bind-Value="cron" DisplayName="Cron"></InputText>
 </div>
+	}
+	else {
+
+		<div class="col-md">
+			<label> Cron </label>
+
+			<select @bind=crontext>
+				@foreach(var value in CronMap)
+				{
+
+					<option>@value.Key.ToString()</option>
+
+				}
+
+			</select>
+		</div>
+	}
 <div class="col-md">
-	 <label> FilePaht</label>
+	 <label> FilePath</label>
 	 <InputText @bind-Value="filepath"></InputText>
 </div>
 	 <label>Delimiter</label>
@@ -56,10 +52,10 @@
 	 <label> TableName</label>
 	 <InputText @bind-Value="tablename"></InputText>
 </div>
-<div class="col-md">
-	 <label> HasHeader</label>
-	 <InputCheckbox @bind-Value="hasheader" > hasheader </InputCheckbox>
-</div>
+
+
+
+
 
 	<div class="col-md-2">
 		<button type="button" class="btn btn-primary" @onclick="createTask">Create Task</button>
@@ -93,8 +89,22 @@
 					<td>@task.LastExecution</td>
 					<td>@task.NextExecution</td>
 					<td>
-						<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>
-						<button type="button" class="btn btn-secondary" @onclick="()=> Trigger(task.JobID)">Trigger</button>
+
+						<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
+									  Click=@(async args =>
+							  {
+							  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete Task",
+							  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+							  if (confirmed == true)
+							  {
+								await Delete(task.JobID);
+							  }
+							  }) />
+
+
+						<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>-->
+
+						<RadzenButton Icon="refresh" Text = "Trigger" ButtonStyle="ButtonStyle.Success"  @onclick="()=> Trigger(task.JobID)"></RadzenButton>
 					</td>
 				</tr>
 			}
