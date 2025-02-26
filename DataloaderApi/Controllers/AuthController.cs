@@ -84,7 +84,7 @@ namespace DataloaderApi.Controllers
 
         [HttpPut("ChangePassword")]
 
-        [Authorize]
+      //  [Authorize]
         public async Task<ActionResult<bool>> changePassword(string username, string password)
         {
             try

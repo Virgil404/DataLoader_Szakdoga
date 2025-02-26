@@ -62,7 +62,7 @@
 							  }) />
 
 
-						<RadzenButton Text="Change user Password" ButtonStyle="ButtonStyle.Primary" Click =@ShowInlineDialog></RadzenButton>
+						<RadzenButton Text="Change user Password" ButtonStyle="ButtonStyle.Primary" Click ="()=>ShowInlineDialog(user.username)"></RadzenButton>
 						<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(user.username)">Delete</button>-->
 						<!--<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalCenter">Change Password</button>-->
 						
@@ -78,3 +78,27 @@
 	</tbody>
 </table>
 
+
+@code {
+
+
+	//int orderID = 10248;
+	
+	async Task ShowInlineDialog(string username)
+	{
+		var result = await DialogService.OpenAsync("Password Change", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+		<p>Change Password</p>
+			<RadzenStack Orientation="Orientation.Horizontal">
+				<RadzenPassword  @bind-Value="password"></RadzenPassword>
+				<RadzenButton Text="Ok" Click="async () => { await ChangePassword(username, password); ds.Close(true); }" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+
+		</RadzenStack>
+	</RadzenStack>);
+	}
+
+	
+}

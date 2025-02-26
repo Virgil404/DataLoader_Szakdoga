@@ -10,6 +10,7 @@
     using Radzen;
     using Radzen.Blazor.Rendering;
     using Radzen.Blazor;
+    using Microsoft.IdentityModel.Tokens;
 
     public class UsermanagerBlazor: ComponentBase
     {
@@ -81,8 +82,18 @@
         public async Task ChangePassword (string username, string password)
         {
 
-            await userManagerService.ChangePassword(username, password);
+            if (password.IsNullOrEmpty())
+            {
+                NotificationService.Notify(new NotificationMessage 
+                { Severity = NotificationSeverity.Warning, Summary = "cannot change password", Detail = "password field is empty", Duration = 4000 });
+            }
+            else { 
 
+                await userManagerService.ChangePassword(username, password);
+
+            NotificationService.Notify(new NotificationMessage
+            { Severity = NotificationSeverity.Success, Summary = "Password Changed successfully", Duration = 4000 });
+            }
         }
 
         public async Task ChangePasswordDialog(string username)
