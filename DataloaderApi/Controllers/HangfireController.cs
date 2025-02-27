@@ -4,6 +4,7 @@ using Hangfire.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Dataloader.Api.DTO;
+using Microsoft.AspNetCore.Authorization;
 namespace DataloaderApi.Controllers
 {
     [Route("api/[controller]")]
@@ -17,6 +18,7 @@ namespace DataloaderApi.Controllers
 
             _dataProcess = dataProcess;
         }
+
 
         private async void CreateRecurringJob(string cron, string jobname, string filepath, string delimiter, bool hasheader, string tableName)
         {
@@ -40,6 +42,7 @@ namespace DataloaderApi.Controllers
 
         }
 
+       // [Authorize]
         [HttpPost("CreateTask")]
         public async Task<ActionResult> createTask(string cron, string jobname, string filePath, string delimiter, bool hasheader, string tableName)
         {
@@ -98,7 +101,7 @@ namespace DataloaderApi.Controllers
 
         }
 
-
+    //    [Authorize]
         [HttpDelete("DeleteTask")]
         public async Task<ActionResult> deletetask(string taskid)
         {
@@ -114,6 +117,7 @@ namespace DataloaderApi.Controllers
             }
         }
 
+      //  [Authorize]
         [HttpPost("triggerjob")]
 
         public async Task<ActionResult> triggerJob(string taskid)

@@ -1,4 +1,5 @@
-﻿using DataloaderApi.Data;
+﻿using Dataloader.Api.DTO;
+using DataloaderApi.Data;
 
 namespace DataloaderApi.Dao
 {
@@ -22,5 +23,7 @@ namespace DataloaderApi.Dao
         public Task<bool> isTokenValid(string token);
 
         public Task<User> findUserByToken(string token);
+
+        public Task<List<UserDTO>> GetUsers();
     }
 }

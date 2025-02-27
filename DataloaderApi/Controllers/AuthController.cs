@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Dataloader.Api.DTO;
 using DataloaderApi.Auth;
 using DataloaderApi.Data;
+using Microsoft.AspNetCore.Authorization;
 namespace DataloaderApi.Controllers
 {
 
@@ -21,6 +22,7 @@ namespace DataloaderApi.Controllers
         }
 
 
+       // [Authorize]
         [HttpPost("createUser")]
         public async Task<ActionResult<bool>> createUser(string username, string password, string role)
         {
@@ -42,6 +44,16 @@ namespace DataloaderApi.Controllers
             }
 
         }
+
+        [HttpGet("getuserlist")]
+
+        public async Task<ActionResult<UserDTO>> getusers()
+        {
+            var users = await _authHandling.GetUsers();
+            return Ok(users);
+
+        }
+
         [HttpDelete("deleteUser")]
 
         public async Task<ActionResult> deleteUser(string UserName)
@@ -72,6 +84,7 @@ namespace DataloaderApi.Controllers
 
         [HttpPut("ChangePassword")]
 
+      //  [Authorize]
         public async Task<ActionResult<bool>> changePassword(string username, string password)
         {
             try
@@ -99,6 +112,9 @@ namespace DataloaderApi.Controllers
             }
 
         }
+
+
+
 
         [HttpPost("Login")]
 
@@ -177,7 +193,7 @@ namespace DataloaderApi.Controllers
         {
             var refreshToken = Request.Cookies["refreshtoken"];
 
-            if (refreshToken != null) _authHandling.disableUserTokenByToken(refreshToken);
+            if (refreshToken != null) await _authHandling.disableUserTokenByToken(refreshToken);
             return Ok();
 
 
