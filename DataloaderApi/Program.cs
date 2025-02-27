@@ -1,11 +1,11 @@
 
 using System.Text;
-using DataloaderApi.Auth;
 using DataloaderApi.Dao;
 using DataloaderApi.DataRead;
 using DataloaderApi.Extension;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -29,27 +29,19 @@ namespace DataloaderApi
             builder.Services.AddHangfire(configuration => configuration      
                   .UseSqlServerStorage(connectionString)
                    
-                  ); 
+                  );
 
-            
+
+            builder.Services.AddDbContext<IdentityContext>(options =>
+    options.UseSqlServer(connectionString));
+
+
             // Authentication 
             builder.Services.AddAuthorization();
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt =>
+            builder.Services.AddAuthentication();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+            .AddEntityFrameworkStores<IdentityContext>();
 
-            {
-                opt.RequireHttpsMetadata = true;
-                opt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
-                    ValidIssuer = builder.Configuration["JWT:Issuer"],
-                    ValidAudience = builder.Configuration["JWT:Audience"],
-                    ClockSkew = TimeSpan.Zero
-                };
-
-            });
-
-            
             // Hangfire
             builder.Services.AddHangfireServer();
             // db config hangfire
@@ -67,7 +59,6 @@ namespace DataloaderApi
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped(typeof(IAuthHandlingDao), typeof(AuthHandlingDao));
             builder.Services.AddScoped<DataProcess>();
-            builder.Services.AddScoped<TokenProvider>();
 
             builder.Services.AddCors(options =>
             {
@@ -86,6 +77,7 @@ namespace DataloaderApi
                 app.UseSwaggerUI();
             }
 
+            app.MapIdentityApi<IdentityUser>();
             app.UseCors("AllowSpecificOrigins");
             app.UseHttpsRedirection();
 
