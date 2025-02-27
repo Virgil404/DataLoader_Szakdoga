@@ -117,7 +117,7 @@ namespace DataloaderApi.Controllers
             }
         }
 
-        [Authorize]
+      //  [Authorize]
         [HttpPost("triggerjob")]
 
         public async Task<ActionResult> triggerJob(string taskid)

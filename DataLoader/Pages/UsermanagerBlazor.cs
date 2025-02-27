@@ -1,15 +1,10 @@
 ﻿namespace DataLoader.Pages
 {
-    using System.Diagnostics.Metrics;
     using System.Threading.Tasks;
     using Dataloader.Api.DTO;
-    using DataLoader.Services;
     using DataLoader.Services.InterFaces;
     using Microsoft.AspNetCore.Components;
-    using Newtonsoft.Json.Linq;
     using Radzen;
-    using Radzen.Blazor.Rendering;
-    using Radzen.Blazor;
     using Microsoft.IdentityModel.Tokens;
 
     public class UsermanagerBlazor: ComponentBase
@@ -96,10 +91,6 @@
             }
         }
 
-        public async Task ChangePasswordDialog(string username)
-        {
-         
-        }
 
 
 

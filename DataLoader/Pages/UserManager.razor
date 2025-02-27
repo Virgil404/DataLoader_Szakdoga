@@ -4,6 +4,27 @@
 <h3>Create Users</h3>
 
 
+<RadzenCard class="rz-my-6">
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.NoWrap">
+		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+			<label> Username</label>
+			<InputText @bind-Value="username" DisplayName="userName"> </InputText>
+		</RadzenStack>
+		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+			<label> Password </label>
+			<InputText @bind-Value="password" type="password" DisplayName="Cron"></InputText>
+		</RadzenStack>
+		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+			<label> Role</label>
+			<InputText @bind-Value="role"></InputText>
+		</RadzenStack>
+		<RadzenStack Orientation="Orientation.Vertical"  Gap="4px" >
+			<RadzenButton ButtonStyle="ButtonStyle.Primary" Style="margin-top: 25px;" Icon="add_circle" Click="CreateUser" Text="Create User"></RadzenButton>
+		</RadzenStack>
+	</RadzenStack>
+</RadzenCard>
+
+<!--
 <div>
 
 	<div class="col-md">
@@ -23,10 +44,10 @@
 		<button type="button" class="btn btn-primary" @onclick="CreateUser">Create User</button>
 	</div>
 </div>
+-->
 
+<RadzenButton ButtonStyle="ButtonStyle.Light" Style="margin-bottom: 10px; margin-top: 20px " Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
 
-
-<button class="btn btn-primary" @onclick="RefreshList">Refresh List</button>
 
 <table class="table table-bordered table-hover">
 
@@ -48,21 +69,21 @@
 					<td>@user.Role</td>
 					<td>
 
-						<RadzenButton Text="Delete User" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
+						<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
 									  Click=@(async args =>
 							  {
 							  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete User",
 							  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 							  if (confirmed == true)
 							  {
-								Delete(user.username);
+								await Delete(user.username);
 								DialogService.Close();
 							  }
 							  else DialogService.Close();
 							  }) />
 
 
-						<RadzenButton Text="Change user Password" ButtonStyle="ButtonStyle.Primary" Click ="()=>ShowInlineDialog(user.username)"></RadzenButton>
+						<RadzenButton Text="Reset Password" ButtonStyle="ButtonStyle.Primary" Click ="()=>ShowInlineDialog(user.username)"></RadzenButton>
 						<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(user.username)">Delete</button>-->
 						<!--<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModalCenter">Change Password</button>-->
 						
@@ -72,7 +93,7 @@
 		}
 		else
 		{
-			<tr><td colspan="6">No jobs available</td></tr>
+			<tr><td colspan="6">Loading users</td></tr>
 		}
 
 	</tbody>
@@ -82,7 +103,6 @@
 @code {
 
 
-	//int orderID = 10248;
 	
 	async Task ShowInlineDialog(string username)
 	{

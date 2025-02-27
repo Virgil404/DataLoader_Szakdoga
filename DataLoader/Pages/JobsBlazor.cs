@@ -2,6 +2,7 @@
 using DataLoader.Services;
 using DataLoader.Services.InterFaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.IdentityModel.Tokens;
 using Radzen;
 
 namespace DataLoader.Pages
@@ -53,8 +54,21 @@ namespace DataLoader.Pages
         {
             if (!UseCron)
             {
-    
-                if(CronMap.TryGetValue(crontext, out string cronstring))
+
+                if (crontext.IsNullOrEmpty())
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Warning,
+                        Summary = "Task Not Created",
+                        Detail = $"You have to select an interval or select the use Cron option",
+                        Duration = 6000
+
+                    });
+                    return;
+                }
+
+                if (CronMap.TryGetValue(crontext, out string cronstring))
                 {
                     cron=cronstring;
 
@@ -66,7 +80,7 @@ namespace DataLoader.Pages
             if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) {
 
                 NotificationService.Notify(new NotificationMessage
-                { Severity = NotificationSeverity.Success, Summary = "Task Not Created", 
+                { Severity = NotificationSeverity.Warning, Summary = "Task Not Created", 
                     Detail = $"Please fill out all the fields", Duration = 6000 });
 
                 // BadAlert = true;
