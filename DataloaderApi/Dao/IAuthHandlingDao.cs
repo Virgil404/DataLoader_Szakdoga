@@ -1,5 +1,6 @@
 ﻿using Dataloader.Api.DTO;
 using DataloaderApi.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace DataloaderApi.Dao
 {
@@ -11,8 +12,8 @@ namespace DataloaderApi.Dao
 
         public Task<bool> DeleteUser (string username);
 
-        public Task<bool> userExitsWithUserName(string username);
-      //  public Task<User>? GetUserByUserName(string username);
+        //public Task<bool> userExitsWithUserName(string username);
+        // private Task<IdentityUser>? GetUserByUserName(string username);
 
         public Task<List<UserDTO>> GetUsers();
     }

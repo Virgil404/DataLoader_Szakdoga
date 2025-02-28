@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using Identity_auth.Services
+@inject AuthenticationStateProvider provider 
+@inject NavigationManager navigationManager
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -8,6 +12,18 @@
             
         </HeadContent>
     <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+
+                <Authorized>
+                    Welcome    <span class="username">@context.User.Identity.Name</span>!
+                    <button class="btn btn-primary" @onclick="Logout">Log out</button>
+                </Authorized>
+                <NotAuthorized>
+                    <button @onclick="toLogin">Login</button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
         <RadzenComponents />
 
         <article class="content px-4">
@@ -15,3 +31,19 @@
         </article>
     </main>
 </div>
+@code {
+    private void Logout()
+    {
+        var authprovider = (CustomAuthStateProvider)provider;
+
+        authprovider.Logout();
+        navigationManager.NavigateTo("login");
+
+    }
+
+    private void toLogin()
+    {
+        navigationManager.NavigateTo("login");
+
+    }
+}

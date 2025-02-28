@@ -1,10 +1,4 @@
-﻿
-using System.Reflection.Metadata.Ecma335;
-using BCrypt.Net;
-using DataloaderApi.Data;
-using Microsoft.EntityFrameworkCore;
-using Dataloader.Api.DTO;
-using System.Linq;
+﻿using Dataloader.Api.DTO;
 using Microsoft.AspNetCore.Identity;
 
 namespace DataloaderApi.Dao
@@ -33,7 +27,7 @@ namespace DataloaderApi.Dao
         public async Task<bool> ChangePassword(string username, string Password)
         {
 
-            var user = await userManager.FindByEmailAsync(username);
+            var user = await GetUserByUserName(username);
             if (user == null) return false;
             await userManager.ResetPasswordAsync(user, userManager.GeneratePasswordResetTokenAsync(user).Result, Password);
             return true;
@@ -42,7 +36,8 @@ namespace DataloaderApi.Dao
         public async Task<bool> DeleteUser(string username)
         {
 
-            var userdelete = await userManager.FindByEmailAsync(username);
+            var userdelete = await GetUserByUserName(username);
+            if (userdelete == null) return false;
             if (await userExitsWithUserName(username))
             {
                 await userManager.DeleteAsync(userdelete);
@@ -56,9 +51,10 @@ namespace DataloaderApi.Dao
 
 
 
-        public async Task<bool> userExitsWithUserName(string username)
+
+        private async Task<bool> userExitsWithUserName(string username)
         {
-          var userexist = await userManager.FindByEmailAsync(username);
+          var userexist = await GetUserByUserName(username);
             if (userexist == null) return false;
             return true;
         }
@@ -76,7 +72,16 @@ namespace DataloaderApi.Dao
             return userdtolist;
         }
 
-
-
+        public async Task<IdentityUser>? GetUserByUserName(string username)
+        {
+            try { 
+            var user = await userManager.FindByNameAsync(username);
+                return user;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     }
 }

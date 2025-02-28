@@ -1,9 +1,9 @@
 ﻿@page "/Login"
 @using DataLoader.Services.InterFaces
 @layout EmptyLayout 
-
-@inject IAuthService authservice
+@using Identity_auth.Services
 @inject NavigationManager nav
+@inject AuthenticationStateProvider authenticationStateProvider
 
 
 <style>
@@ -109,8 +109,8 @@
             <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
             alt="">
             <div class="form-signin">
-                <input type="text" @bind-value="Username" class="form-control" placeholder="Username" required autofocus>
-                <input type="password" @bind-value="Password" class="form-control" placeholder="Password" required>
+                <input type="text" @bind-value="email" class="form-control" placeholder="Username" required autofocus>
+                <input type="password" @bind-value="password" class="form-control" placeholder="Password" required>
                 <button class="btn btn-lg btn-primary btn-block w-100" @onclick="OnLogin">
                     Sign in
                 </button>
@@ -122,17 +122,22 @@
 
 @code{
 
-    public string Username { get; set; }
-    public string Password { get; set; }
+    public string email = "";
+    public string password = "";
+    public string error = "";
 
     private async Task OnLogin()
     {
-        var status = await authservice.Login(Username,Password);
-        
-        if (status)
+        var authState = (CustomAuthStateProvider)authenticationStateProvider;
+        var formresult = await authState.LoginAsync(email, password);
+        if (formresult.succeeded)
         {
             nav.NavigateTo("/");
         }
-    }
+        else
+        {
+            error = formresult.Errors[0];
+        }
 
+    }
 }
