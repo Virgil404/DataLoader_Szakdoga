@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace DataloaderApi.Dao
+namespace DataloaderApi.Dao.Interfaces
 {
     public interface ICsvLoadDao<T>
     {

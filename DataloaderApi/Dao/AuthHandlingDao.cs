@@ -1,4 +1,5 @@
 ﻿using Dataloader.Api.DTO;
+using DataloaderApi.Dao.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace DataloaderApi.Dao
@@ -11,16 +12,28 @@ namespace DataloaderApi.Dao
         private readonly Applicationcontext _context;
         private readonly UserManager<IdentityUser> userManager;
         private readonly IdentityContext _identityContext;
-        public AuthHandlingDao(Applicationcontext context, UserManager<IdentityUser> userManager, IdentityContext identityContext)
+      //  private readonly RoleManager<IdentityUser> _roleManager;
+        public AuthHandlingDao(Applicationcontext context, UserManager<IdentityUser> userManager, IdentityContext identityContext )
         {
             _context = context;
             this.userManager = userManager;
             _identityContext = identityContext;
+           // _roleManager = roleManager;
         }
 
-        public async Task<bool> CreateUser(string username, string password , string Role)
+        public async Task<bool> CreateUser(RegisterDTO registerDTO)
         {
-            throw new System.NotImplementedException();
+          
+            var result = await userManager.CreateAsync(new IdentityUser { Email = registerDTO.email, UserName = registerDTO.username }, registerDTO.password);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(await userManager.FindByNameAsync(registerDTO.username), registerDTO.role);
+                return true;
+            }
+            return false;
+
+
         }
 
 
@@ -59,14 +72,16 @@ namespace DataloaderApi.Dao
             return true;
         }
 
-
+      
         public async Task<List<UserDTO>> GetUsers()
         {
             var userlist = userManager.Users.ToList();
             var userdtolist = new List<UserDTO>();
             foreach (var user in userlist)
             {
-               userdtolist.Add(new UserDTO { username = user.Email, Role =  userManager.GetRolesAsync(user).ToString() });
+                var currentuserrole =  await userManager.GetRolesAsync(user);
+                
+                userdtolist.Add(new UserDTO { username = user.UserName, email=user.Email ,Role = String.Join(",", currentuserrole) });
             }
 
             return userdtolist;
@@ -82,6 +97,13 @@ namespace DataloaderApi.Dao
             {
                 return null;
             }
+        }
+        
+        public async Task<bool> changeRole(string username)
+        {
+
+            throw new NotImplementedException();
+
         }
     }
 }

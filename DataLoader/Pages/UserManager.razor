@@ -1,6 +1,12 @@
 ﻿@page "/usermanager"
 @inherits UsermanagerBlazor
 @inject DialogService DialogService
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+
+
+<AuthorizeView Roles="Admin">
+<Authorized>
 <h3>Create Users</h3>
 
 
@@ -12,9 +18,14 @@
 		</RadzenStack>
 		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
 			<label> Password </label>
-			<InputText @bind-Value="password" type="password" DisplayName="Cron"></InputText>
+			<InputText @bind-Value="password" type="password" DisplayName="password"></InputText>
 		</RadzenStack>
 		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label> Email </label>
+					<InputText @bind-Value="email" DisplayName="email"></InputText>
+		</RadzenStack>
+
+			<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
 			<label> Role</label>
 			<InputText @bind-Value="role"></InputText>
 		</RadzenStack>
@@ -49,12 +60,14 @@
 <RadzenButton ButtonStyle="ButtonStyle.Light" Style="margin-bottom: 10px; margin-top: 20px " Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
 
 
+
 <table class="table table-bordered table-hover">
 
 	<thead>
 		<tr>
 			<th scope="col">Name</th>
 			<th scope="col">Role</th>
+			<th scope="col">Email</th>
 			<th scope="col">Actions</th>
 		</tr>
 	</thead>
@@ -67,6 +80,7 @@
 				<tr>
 					<td>@user.username</td>
 					<td>@user.Role</td>
+                    <td>@user.email</td>
 					<td>
 
 						<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
@@ -98,7 +112,12 @@
 
 	</tbody>
 </table>
+	</Authorized>
 
+	<NotAuthorized>
+		No access 
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
 

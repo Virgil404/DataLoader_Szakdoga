@@ -2,11 +2,11 @@
 using DataloaderApi.Data;
 using Microsoft.AspNetCore.Identity;
 
-namespace DataloaderApi.Dao
+namespace DataloaderApi.Dao.Interfaces
 {
     public interface IAuthHandlingDao
     {
-        public  Task<bool> CreateUser (string username, string password, string role);
+        public  Task<bool> CreateUser (RegisterDTO registerDTO);
 
         public Task<bool> ChangePassword(string username,string password);
 
@@ -16,5 +16,8 @@ namespace DataloaderApi.Dao
         // private Task<IdentityUser>? GetUserByUserName(string username);
 
         public Task<List<UserDTO>> GetUsers();
+
+        public Task<bool> changeRole(string username);
+  
     }
 }

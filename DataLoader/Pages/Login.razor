@@ -4,7 +4,7 @@
 @using Identity_auth.Services
 @inject NavigationManager nav
 @inject AuthenticationStateProvider authenticationStateProvider
-
+@inject NotificationService NotificationService
 
 <style>
     body {
@@ -120,6 +120,9 @@
 </div>
 
 
+
+
+
 @code{
 
     public string email = "";
@@ -129,14 +132,25 @@
     private async Task OnLogin()
     {
         var authState = (CustomAuthStateProvider)authenticationStateProvider;
+        Console.WriteLine("Test Message");
         var formresult = await authState.LoginAsync(email, password);
-        if (formresult.succeeded)
+        if (formresult)
         {
             nav.NavigateTo("/");
         }
         else
         {
-            error = formresult.Errors[0];
+            Console.WriteLine("wrong passowrd");
+
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cant log in ",
+                    Detail = $"Wrong username or Password",
+                    Duration = 6000
+
+                });
+            return;
         }
 
     }

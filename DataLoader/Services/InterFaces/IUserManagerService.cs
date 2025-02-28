@@ -5,7 +5,7 @@ namespace DataLoader.Services.InterFaces
     public interface IUserManagerService
     {
 
-        public  Task CreateUser ( string username, string password, string role);
+        public  Task CreateUser (RegisterDTO register);
 
         public Task DeleteUser ( string username);
 

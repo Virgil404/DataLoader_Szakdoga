@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Dataloader.Api.DTO
 {
@@ -10,6 +6,7 @@ namespace Dataloader.Api.DTO
 
     {
         public string username { get; set; }
+        public string email { get; set; }
         public string Role { get; set; }
 
     }

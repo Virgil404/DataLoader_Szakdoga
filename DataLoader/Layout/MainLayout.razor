@@ -16,11 +16,11 @@
             <AuthorizeView>
 
                 <Authorized>
-                    Welcome    <span class="username">@context.User.Identity.Name</span>!
+                    Welcome  <p>@context.User.Identity.Name</p>  
                     <button class="btn btn-primary" @onclick="Logout">Log out</button>
                 </Authorized>
                 <NotAuthorized>
-                    <button @onclick="toLogin">Login</button>
+                   <LoginRedirect/>
                 </NotAuthorized>
             </AuthorizeView>
         </div>

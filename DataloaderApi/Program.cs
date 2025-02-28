@@ -1,9 +1,12 @@
 
 using System.Text;
+using System.Threading.Tasks;
 using DataloaderApi.Dao;
+using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.DataRead;
 using DataloaderApi.Extension;
 using Hangfire;
+using IdentityAuthTest.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +16,7 @@ namespace DataloaderApi
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -34,12 +37,20 @@ namespace DataloaderApi
 
             builder.Services.AddDbContext<IdentityContext>(options =>
     options.UseSqlServer(connectionString));
-
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+            });
 
             // Authentication 
             builder.Services.AddAuthorization();
             builder.Services.AddAuthentication();
             builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<IdentityContext>();
 
             // Hangfire
@@ -59,6 +70,11 @@ namespace DataloaderApi
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped(typeof(IAuthHandlingDao), typeof(AuthHandlingDao));
             builder.Services.AddScoped<DataProcess>();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy =>
+                    policy.RequireRole("Admin"));
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -85,6 +101,11 @@ namespace DataloaderApi
             app.UseHangfireDashboard();
 
             app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await SeedData.Initialize(scope.ServiceProvider);
+            }
 
             app.Run();
         }

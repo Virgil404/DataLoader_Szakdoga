@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Dataloader.Api.DTO;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -32,10 +33,12 @@ namespace Identity_auth.Services
 
             try
             {
-                var response = await _httpClient.GetAsync("manage/info");
+                var response = await _httpClient.GetAsync("/api/Auth/userprofile");
 
                 if (response.IsSuccessStatusCode)
                 {
+
+                    /*
                     var stringresp = await response.Content.ReadAsStringAsync();
                     var jsonresp = JsonNode.Parse(stringresp);
                     var username = jsonresp["email"].ToString();
@@ -45,6 +48,21 @@ namespace Identity_auth.Services
                         new Claim(ClaimTypes.Name, username),
                         new Claim(ClaimTypes.Email, username)
                     };
+                    */
+                    var userprofile = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    if (userprofile == null) throw new Exception("User not found");
+                    var userroles = userprofile.Role.Split(",");
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, userprofile.username),
+                        new Claim(ClaimTypes.Email, userprofile.email)
+                    };
+
+                    foreach (var role in userroles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
+
                     var identity = new ClaimsIdentity(claims, "Token");
                     user = new ClaimsPrincipal(identity);
                     return new AuthenticationState(user);
@@ -61,7 +79,7 @@ namespace Identity_auth.Services
 
         }
 
-        public async Task<FormResult> LoginAsync(string username, string password)
+        public async Task<bool> LoginAsync(string username, string password)
         {
 
             try
@@ -74,6 +92,11 @@ namespace Identity_auth.Services
 
                 var response = await _httpClient.PostAsJsonAsync("login", json);
 
+                if (response.StatusCode.Equals("401"))
+                {
+                    return false;
+                }
+               
                 if (response.IsSuccessStatusCode)
                 {
                     var stringresp = await response.Content.ReadAsStringAsync();
@@ -89,12 +112,12 @@ namespace Identity_auth.Services
                     NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
 
-                    return new FormResult { succeeded = true };
+                    return true;
                 }
                 else
                 {
                     //var errors = await response.Content.ReadFromJsonAsync<string[]>();
-                    return new FormResult { succeeded = false, Errors = ["Bad email or password"] };
+                    return false;
                 }
 
             }

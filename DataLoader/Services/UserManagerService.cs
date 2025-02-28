@@ -2,13 +2,13 @@
 using System.Text;
 using Dataloader.Api.DTO;
 using DataLoader.Services.InterFaces;
+using Microsoft.AspNet.Identity;
 
 namespace DataLoader.Services
 {
     public class UserManagerService :IUserManagerService
     {
         private readonly HttpClient httpClient;
-
         public UserManagerService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
@@ -31,12 +31,13 @@ namespace DataLoader.Services
 
         }
 
-        public async Task CreateUser(string username, string password, string role)
+        public async Task CreateUser(RegisterDTO registerDTO)
         {
-            var url = $"/api/Auth/createUser?username={Uri.EscapeDataString(username)}&password={Uri.EscapeDataString(password)}&role={Uri.EscapeDataString(role)}";
-            var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+            var url = $"/api/Auth/createUser";
 
-            using var response = await httpClient.PostAsync(url, content);
+            var json = JsonContent.Create(registerDTO);
+
+            using var response = await httpClient.PostAsync(url, json);
 
             Console.WriteLine("Response: " + response);
             if (!response.IsSuccessStatusCode)

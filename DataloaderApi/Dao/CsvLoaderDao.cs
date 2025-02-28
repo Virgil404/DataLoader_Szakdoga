@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using DataloaderApi.Dao.Interfaces;
 namespace DataloaderApi.Dao
 {
     public class CsvLoaderDao<T>: ICsvLoadDao<T>

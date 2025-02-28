@@ -1,9 +1,9 @@
-﻿using DataloaderApi.Dao;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Dataloader.Api.DTO;
 using DataloaderApi.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using DataloaderApi.Dao.Interfaces;
 namespace DataloaderApi.Controllers
 {
 
@@ -29,13 +29,14 @@ namespace DataloaderApi.Controllers
 
         // [Authorize]
         [HttpPost("createUser")]
-        public async Task<ActionResult<bool>> createUser(string username, string password, string role)
+        [Authorize(Roles ="Admin")]
+        public async Task<ActionResult<bool>> createUser(RegisterDTO registerDTO)
         {
 
             
             try
             {
-              var result =  await _authHandling.CreateUser(username, password, role);
+              var result =  await _authHandling.CreateUser(registerDTO);
 
                 if(result) return Ok();
                 return BadRequest(result);
@@ -50,13 +51,38 @@ namespace DataloaderApi.Controllers
 
         }
 
-        [HttpGet("getuserlist")]
+        [HttpGet("userprofile")]
+        [Authorize]
+        public async Task<ActionResult<UserDTO>> userProfile()
+        {
 
+            var currentuser = await userManager.GetUserAsync(User);
+            if (currentuser == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            var userroles = await userManager.GetRolesAsync(currentuser);
+
+            var user = new UserDTO
+            {
+                username = currentuser.UserName,
+                email = currentuser.Email,
+                Role = string.Join(",", userroles)
+            };
+
+            return Ok(user);
+        }
+
+
+        [HttpGet("getuserlist")]
+        [Authorize]
         public async Task<ActionResult<UserDTO>> getusers()
         {
 
             try
             {
+               
                 var result = await _authHandling.GetUsers();
                 return Ok(result);
             }
@@ -69,7 +95,7 @@ namespace DataloaderApi.Controllers
         }
 
         [HttpDelete("deleteUser")]
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> deleteuser(String username)
         {
             // _applicationDBContext.Users
@@ -90,7 +116,7 @@ namespace DataloaderApi.Controllers
 
         [HttpPut("ChangePassword")]
 
-      //  [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<ActionResult<bool>> changePassword(string username, string password)
         {
             try
