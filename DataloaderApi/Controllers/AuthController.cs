@@ -1,9 +1,9 @@
-﻿using DataloaderApi.Dao;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Dataloader.Api.DTO;
-using DataloaderApi.Auth;
 using DataloaderApi.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using DataloaderApi.Dao.Interfaces;
 namespace DataloaderApi.Controllers
 {
 
@@ -14,23 +14,29 @@ namespace DataloaderApi.Controllers
      
         
         private readonly IAuthHandlingDao _authHandling;
-        private readonly TokenProvider _tokenProvider;
-        public AuthController (IAuthHandlingDao authHandling, TokenProvider tokenProvider)
+
+        // private readonly TokenProvider _tokenProvider;
+        private readonly UserManager<IdentityUser> userManager;
+        private readonly IdentityContext _identityContext;
+        public AuthController (IAuthHandlingDao authHandling, UserManager<IdentityUser> userManager, IdentityContext identityContext)
         {
             _authHandling = authHandling;
-            _tokenProvider = tokenProvider;
+            this.userManager = userManager;
+            _identityContext = identityContext;
+            // _tokenProvider = tokenProvider;
         }
 
 
-       // [Authorize]
+        // [Authorize]
         [HttpPost("createUser")]
-        public async Task<ActionResult<bool>> createUser(string username, string password, string role)
+        [Authorize(Roles ="Admin")]
+        public async Task<ActionResult<bool>> createUser(RegisterDTO registerDTO)
         {
 
             
             try
             {
-              var result =  await _authHandling.CreateUser(username, password, role);
+              var result =  await _authHandling.CreateUser(registerDTO);
 
                 if(result) return Ok();
                 return BadRequest(result);
@@ -45,46 +51,72 @@ namespace DataloaderApi.Controllers
 
         }
 
-        [HttpGet("getuserlist")]
-
-        public async Task<ActionResult<UserDTO>> getusers()
+        [HttpGet("userprofile")]
+        [Authorize]
+        public async Task<ActionResult<UserDTO>> userProfile()
         {
-            var users = await _authHandling.GetUsers();
-            return Ok(users);
 
+            var currentuser = await userManager.GetUserAsync(User);
+            if (currentuser == null)
+            {
+                return BadRequest("User not found");
+            }
+
+            var userroles = await userManager.GetRolesAsync(currentuser);
+
+            var user = new UserDTO
+            {
+                username = currentuser.UserName,
+                email = currentuser.Email,
+                Role = string.Join(",", userroles)
+            };
+
+            return Ok(user);
         }
 
-        [HttpDelete("deleteUser")]
 
-        public async Task<ActionResult> deleteUser(string UserName)
+        [HttpGet("getuserlist")]
+        [Authorize]
+        public async Task<ActionResult<UserDTO>> getusers()
         {
 
             try
             {
-                var result = await _authHandling.DeleteUser(UserName);
-
-                if (result)
-                {
-                    return Ok();
-                }
-                return BadRequest("User Cannot be deleted");
-
-
-
+               
+                var result = await _authHandling.GetUsers();
+                return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
-                return BadRequest(ex.Message);
-
+                return BadRequest();
             }
+
+        }
+
+        [HttpDelete("deleteUser")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> deleteuser(String username)
+        {
+            // _applicationDBContext.Users
+            var user = await userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
+            var result = await userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                return Ok("User deleted");
+            }
+            return BadRequest("User not deleted");
 
 
         }
 
         [HttpPut("ChangePassword")]
 
-      //  [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<ActionResult<bool>> changePassword(string username, string password)
         {
             try
@@ -115,89 +147,6 @@ namespace DataloaderApi.Controllers
 
 
 
-
-        [HttpPost("Login")]
-
-        public async Task<ActionResult<AuthResponse>>Login(string username, string password)
-        {
-
-            var response = new AuthResponse();
-
-            var user = await _authHandling.GetUserByUserName(username);
-
-            if (user == null)
-            {
-                Console.WriteLine("User not Found");
-                return BadRequest("user not found");
-
-            }
-
-            var verifypassword = BCrypt.Net.BCrypt.Verify(password, user.Password);
-
-
-            if (!verifypassword)
-            {
-                Console.WriteLine("Password is not matching");
-
-                return BadRequest("Wrong password");
-
-            }
-
-            //Create AccessToken
-            var token = _tokenProvider.GenerateToken(user);
-            response.AccesToken = token.AccesToken;
-
-            response.RefreshToken = token.RefreshToken.Token;
-            await _authHandling.disableuserTokenByuserName(user.UserID);
-            await _authHandling.insertRefreshToken(token.RefreshToken, user.UserID);
-            
-
-            return Ok(response);
-
-        }
-
-
-        [HttpPost("refresh")]
-
-        public async Task<ActionResult<AuthResponse>> RefreshToken()
-        {
-            var response = new AuthResponse();
-
-            var refreshToken = Request.Cookies["refreshtoken"];
-
-            if (String.IsNullOrEmpty(refreshToken)) return BadRequest();
-
-            var isvalid = await _authHandling.isTokenValid(refreshToken);
-            if (!isvalid) return BadRequest();
-
-            var curruser = await _authHandling.findUserByToken(refreshToken);
-
-            if (curruser == null) return BadRequest();
-
-
-            var token = _tokenProvider.GenerateToken(curruser);
-            response.AccesToken = token.AccesToken;
-
-            response.RefreshToken = token.RefreshToken.Token;
-
-            await _authHandling.disableUserTokenByToken(token.RefreshToken.Token);
-
-            await _authHandling.insertRefreshToken(token.RefreshToken,curruser.UserID);
-
-            return Ok(response);
-        }
-
-        [HttpPost("logout")]
-
-        public async Task<ActionResult> logout()
-        {
-            var refreshToken = Request.Cookies["refreshtoken"];
-
-            if (refreshToken != null) await _authHandling.disableUserTokenByToken(refreshToken);
-            return Ok();
-
-
-        }
 
     }
 }

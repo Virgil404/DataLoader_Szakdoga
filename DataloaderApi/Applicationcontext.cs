@@ -18,12 +18,13 @@ namespace DataloaderApi
         public DbSet<CrimeData> CrimeData { get; set; }
         public DbSet<Tables> Tables { get; set; }
 
-        public DbSet<User> Users { get; set; }
+     //   public DbSet<User> Users { get; set; }
 
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
+       // public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            /*
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>().HasData(new User
@@ -41,6 +42,8 @@ namespace DataloaderApi
                 .WithOne(rt => rt.User)        // RefreshToken has one User
                 .HasForeignKey<RefreshToken>(rt => rt.Username) // FK on RefreshToken
                 .OnDelete(DeleteBehavior.Cascade);
+            */
         }
+            
     }
 }

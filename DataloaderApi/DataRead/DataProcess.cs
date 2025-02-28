@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using System.Reflection;
-using DataloaderApi.Dao;
+using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.Data;
 using DataloaderApi.DataRead;
 using Microsoft.Extensions.DependencyInjection;

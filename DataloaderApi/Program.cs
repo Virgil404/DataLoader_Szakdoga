@@ -1,11 +1,14 @@
 
 using System.Text;
-using DataloaderApi.Auth;
+using System.Threading.Tasks;
 using DataloaderApi.Dao;
+using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.DataRead;
 using DataloaderApi.Extension;
 using Hangfire;
+using IdentityAuthTest.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -13,7 +16,7 @@ namespace DataloaderApi
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -29,27 +32,27 @@ namespace DataloaderApi
             builder.Services.AddHangfire(configuration => configuration      
                   .UseSqlServerStorage(connectionString)
                    
-                  ); 
+                  );
 
-            
-            // Authentication 
-            builder.Services.AddAuthorization();
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(opt =>
 
+            builder.Services.AddDbContext<IdentityContext>(options =>
+    options.UseSqlServer(connectionString));
+            builder.Services.Configure<IdentityOptions>(options =>
             {
-                opt.RequireHttpsMetadata = true;
-                opt.TokenValidationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
-                    ValidIssuer = builder.Configuration["JWT:Issuer"],
-                    ValidAudience = builder.Configuration["JWT:Audience"],
-                    ClockSkew = TimeSpan.Zero
-                };
-
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
             });
 
-            
+            // Authentication 
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+             .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<IdentityContext>();
+
             // Hangfire
             builder.Services.AddHangfireServer();
             // db config hangfire
@@ -67,7 +70,11 @@ namespace DataloaderApi
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped(typeof(IAuthHandlingDao), typeof(AuthHandlingDao));
             builder.Services.AddScoped<DataProcess>();
-            builder.Services.AddScoped<TokenProvider>();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy =>
+                    policy.RequireRole("Admin"));
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -86,6 +93,7 @@ namespace DataloaderApi
                 app.UseSwaggerUI();
             }
 
+            app.MapIdentityApi<IdentityUser>();
             app.UseCors("AllowSpecificOrigins");
             app.UseHttpsRedirection();
 
@@ -93,6 +101,11 @@ namespace DataloaderApi
             app.UseHangfireDashboard();
 
             app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await SeedData.Initialize(scope.ServiceProvider);
+            }
 
             app.Run();
         }

@@ -5,6 +5,11 @@
 <h3>Create Jobs</h3>
 
 
+<AuthorizeView>
+
+
+	<Authorized>
+
 
 
 <RadzenCard class="rz-my-6">
@@ -125,6 +130,12 @@
 	</tbody>
 </table>
 </RadzenCard>
+	</Authorized>
+	<NotAuthorized>
+		<LoginRedirect></LoginRedirect>
+	</NotAuthorized>
+
+</AuthorizeView>
 
 @code {
 

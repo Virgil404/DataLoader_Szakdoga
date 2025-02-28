@@ -16,7 +16,8 @@
 
        public string username { get; set; }
        public string password { get; set; }
-       public string role { get; set; }
+        public string email { get; set; }
+        public string role { get; set; }
 
         public List<UserDTO> userlist;
 
@@ -29,8 +30,17 @@
 
         public async Task CreateUser()
         {
-            try { 
-            await userManagerService.CreateUser(username, password, role);
+            try {
+                var user = new RegisterDTO
+                {
+
+                    username = username,
+                    email = email,
+                    role = role,
+                    password = password 
+                };
+
+            await userManagerService.CreateUser(user);
                 NotificationService.Notify(new NotificationMessage
                 { Severity = NotificationSeverity.Success, Summary = "User created", Detail = $"User created with {username} username", Duration = 6000 });
             }

@@ -1,10 +1,6 @@
-﻿
-using System.Reflection.Metadata.Ecma335;
-using BCrypt.Net;
-using DataloaderApi.Data;
-using Microsoft.EntityFrameworkCore;
-using Dataloader.Api.DTO;
-using System.Linq;
+﻿using Dataloader.Api.DTO;
+using DataloaderApi.Dao.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace DataloaderApi.Dao
 {
@@ -14,220 +10,100 @@ namespace DataloaderApi.Dao
     {
 
         private readonly Applicationcontext _context;
-
-        public AuthHandlingDao(Applicationcontext context)
+        private readonly UserManager<IdentityUser> userManager;
+        private readonly IdentityContext _identityContext;
+      //  private readonly RoleManager<IdentityUser> _roleManager;
+        public AuthHandlingDao(Applicationcontext context, UserManager<IdentityUser> userManager, IdentityContext identityContext )
         {
             _context = context;
+            this.userManager = userManager;
+            _identityContext = identityContext;
+           // _roleManager = roleManager;
         }
 
-        public async Task<bool> CreateUser(string username, string password , string Role)
+        public async Task<bool> CreateUser(RegisterDTO registerDTO)
         {
+          
+            var result = await userManager.CreateAsync(new IdentityUser { Email = registerDTO.email, UserName = registerDTO.username }, registerDTO.password);
 
-            try
+            if (result.Succeeded)
             {
-                var userExists = await userExitsWithUserName(username);
-
-                if (userExists) {
-                    Console.WriteLine("user Alredy exist");
-                    return false;
-                
-                }
-
-
-                var hashedpassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-                var user = new User 
-                { 
-                    UserID = username,
-                    Password = hashedpassword,
-                    Role = Role
-                
-                };
-
-                await _context.AddAsync(user);
-                _context.SaveChanges();
-                Console.WriteLine("User Created Succesfully");
+                await userManager.AddToRoleAsync(await userManager.FindByNameAsync(registerDTO.username), registerDTO.role);
                 return true;
             }
-            catch (Exception ex) { 
-            
-                Console.WriteLine("Error While Creating User "+ex.ToString());
-                return false;
-            
-            }
+            return false;
+
+
         }
 
 
-        public async Task<bool> ChangePassword (string username,string Password)
+        public async Task<bool> ChangePassword(string username, string Password)
         {
 
             var user = await GetUserByUserName(username);
-
-            if (user == null) 
-            {
-                Console.WriteLine("UserNotFound");
-                return false; 
-            }
-
-            user.Password = BCrypt.Net.BCrypt.HashPassword(Password);
-          await  _context.SaveChangesAsync();
+            if (user == null) return false;
+            await userManager.ResetPasswordAsync(user, userManager.GeneratePasswordResetTokenAsync(user).Result, Password);
             return true;
         }
 
         public async Task<bool> DeleteUser(string username)
         {
-            var user = await GetUserByUserName(username);
-            if (user==null)
+
+            var userdelete = await GetUserByUserName(username);
+            if (userdelete == null) return false;
+            if (await userExitsWithUserName(username))
             {
-                Console.WriteLine("UserNotFound");
-                return false;
-
-            }
-            _context.Remove(user);
-            _context.SaveChanges();
-            return true;    
-        }
-
-
-
-
-
-        public async Task<bool> userExitsWithUserName(string username)
-        {
-            var userexist =  from u in _context.Users where u.UserID == username select u;
-            return  await userexist.AnyAsync();
-        }
-
-
-        public async Task<User>? GetUserByUserName(string username)
-        {
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID.Equals(username));
-            return user;
-        }
-
-
-        public async Task<List<UserDTO>> GetUsers()
-        {
-            var userlistdto = new List<UserDTO>();
-            var userlist = new List<User>();
-            userlist = _context.Users.ToList();
-
-            foreach (var user in userlist)
-            {
-                userlistdto.Add(new UserDTO
-                {
-                    username=user.UserID,
-                    Role=user.Role,
-
-                });
-
-            }
-
-            return userlistdto;
-
-        }
-
-
-        public async Task<bool> insertRefreshToken(RefreshToken refreshToken, string username)
-        {
-
-            var user = await GetUserByUserName(username);
-
-            if (user == null) {
-                Console.WriteLine("user not Found");
-                return false;
-            }
-
-            refreshToken.Username = username; 
-            user.RefreshToken = refreshToken; 
-
-            // Add or update refresh token
-         await  _context.RefreshTokens.AddAsync(refreshToken);
-
-            await _context.SaveChangesAsync();
-
-            return true;
-
-        }
-
-        public async Task<bool> disableuserTokenByuserName(string userName)
-        {
-            try
-            {
-                var user = await _context.Users
-                    .Include(u => u.RefreshToken)
-                    .FirstOrDefaultAsync(u => u.UserID == userName);
-
-                if (user == null || user.RefreshToken == null)
-                {
-                    return false; 
-                }
-
-                // Disable the refresh token
-                user.RefreshToken.enabled = false;
-
-                // Save changes to the database
-                await _context.SaveChangesAsync();
-
+                await userManager.DeleteAsync(userdelete);
                 return true;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error disabling user token: {ex.Message}");
-                return false;
-            }
-
+            return false;
 
         }
 
-        public async Task<bool> disableUserTokenByToken (string token)
+
+
+
+
+
+        private async Task<bool> userExitsWithUserName(string username)
         {
-            var reftoken =  _context.RefreshTokens.FirstOrDefault(rt => rt.Token == token);
-
-            if (reftoken == null) {
-
-                Console.WriteLine("No Token Found");
-                return false; 
-            }
-
-            reftoken.enabled = false; 
-            await _context.SaveChangesAsync();
+          var userexist = await GetUserByUserName(username);
+            if (userexist == null) return false;
             return true;
-
         }
 
-
-        public async Task<bool> isTokenValid(string token)
+      
+        public async Task<List<UserDTO>> GetUsers()
         {
-            var reftoken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
-
-            if (reftoken == null) { 
-                return false;   
-            }
-
-           var isvalid = (reftoken.Expires >= DateTime.Now && reftoken.enabled == true); 
-
-            return isvalid;
-
-        }
-
-
-        public async Task<User> findUserByToken(string token)
-        {
-
-            if (string.IsNullOrEmpty(token))
+            var userlist = userManager.Users.ToList();
+            var userdtolist = new List<UserDTO>();
+            foreach (var user in userlist)
             {
-                return null; // Return null if token is invalid
+                var currentuserrole =  await userManager.GetRolesAsync(user);
+                
+                userdtolist.Add(new UserDTO { username = user.UserName, email=user.Email ,Role = String.Join(",", currentuserrole) });
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken.Token == token);
-
-            return user;
-
+            return userdtolist;
         }
 
+        public async Task<IdentityUser>? GetUserByUserName(string username)
+        {
+            try { 
+            var user = await userManager.FindByNameAsync(username);
+                return user;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        
+        public async Task<bool> changeRole(string username)
+        {
 
+            throw new NotImplementedException();
 
+        }
     }
 }

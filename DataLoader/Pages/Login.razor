@@ -1,10 +1,10 @@
-﻿@page "/login"
+﻿@page "/Login"
 @using DataLoader.Services.InterFaces
 @layout EmptyLayout 
-
-@inject IAuthService authservice
+@using Identity_auth.Services
 @inject NavigationManager nav
-
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NotificationService NotificationService
 
 <style>
     body {
@@ -109,8 +109,8 @@
             <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
             alt="">
             <div class="form-signin">
-                <input type="text" @bind-value="Username" class="form-control" placeholder="Username" required autofocus>
-                <input type="password" @bind-value="Password" class="form-control" placeholder="Password" required>
+                <input type="text" @bind-value="email" class="form-control" placeholder="Username" required autofocus>
+                <input type="password" @bind-value="password" class="form-control" placeholder="Password" required>
                 <button class="btn btn-lg btn-primary btn-block w-100" @onclick="OnLogin">
                     Sign in
                 </button>
@@ -120,19 +120,38 @@
 </div>
 
 
+
+
+
 @code{
 
-    public string Username { get; set; }
-    public string Password { get; set; }
+    public string email = "";
+    public string password = "";
+    public string error = "";
 
     private async Task OnLogin()
     {
-        var status = await authservice.Login(Username,Password);
-        
-        if (status)
+        var authState = (CustomAuthStateProvider)authenticationStateProvider;
+        Console.WriteLine("Test Message");
+        var formresult = await authState.LoginAsync(email, password);
+        if (formresult)
         {
             nav.NavigateTo("/");
         }
-    }
+        else
+        {
+            Console.WriteLine("wrong passowrd");
 
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Cant log in ",
+                    Detail = $"Wrong username or Password",
+                    Duration = 6000
+
+                });
+            return;
+        }
+
+    }
 }
