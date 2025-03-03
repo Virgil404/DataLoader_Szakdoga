@@ -1,5 +1,6 @@
 ﻿using Dataloader.Api.DTO;
 using DataloaderApi.Dao.Interfaces;
+using DataloaderApi.Data;
 using Microsoft.AspNetCore.Identity;
 
 namespace DataloaderApi.Dao
@@ -10,10 +11,10 @@ namespace DataloaderApi.Dao
     {
 
         private readonly Applicationcontext _context;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IdentityContext _identityContext;
       //  private readonly RoleManager<IdentityUser> _roleManager;
-        public AuthHandlingDao(Applicationcontext context, UserManager<IdentityUser> userManager, IdentityContext identityContext )
+        public AuthHandlingDao(Applicationcontext context, UserManager<ApplicationUser> userManager, IdentityContext identityContext )
         {
             _context = context;
             this.userManager = userManager;
@@ -24,7 +25,7 @@ namespace DataloaderApi.Dao
         public async Task<bool> CreateUser(RegisterDTO registerDTO)
         {
           
-            var result = await userManager.CreateAsync(new IdentityUser { Email = registerDTO.email, UserName = registerDTO.username }, registerDTO.password);
+            var result = await userManager.CreateAsync(new ApplicationUser { Email = registerDTO.email, UserName = registerDTO.username }, registerDTO.password);
 
             if (result.Succeeded)
             {
@@ -87,7 +88,7 @@ namespace DataloaderApi.Dao
             return userdtolist;
         }
 
-        public async Task<IdentityUser>? GetUserByUserName(string username)
+        public async Task<ApplicationUser>? GetUserByUserName(string username)
         {
             try { 
             var user = await userManager.FindByNameAsync(username);

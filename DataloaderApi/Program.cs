@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DataloaderApi.Dao;
 using DataloaderApi.Dao.Interfaces;
+using DataloaderApi.Data;
 using DataloaderApi.DataRead;
 using DataloaderApi.Extension;
 using Hangfire;
@@ -46,17 +47,19 @@ namespace DataloaderApi
                 options.Password.RequireUppercase = false;
             });
 
+
+
             // Authentication 
+
             builder.Services.AddAuthorization();
             builder.Services.AddAuthentication();
-            builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+            builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
              .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<IdentityContext>();
 
             // Hangfire
             builder.Services.AddHangfireServer();
-            // db config hangfire
-            builder.Services.AddDbContextPool<Applicationcontext>(options =>
+             builder.Services.AddDbContextPool<Applicationcontext>(options =>
 
                 options.UseSqlServer(connectionString)
                
@@ -86,14 +89,13 @@ namespace DataloaderApi
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            app.MapIdentityApi<IdentityUser>();
+            app.MapIdentityApi<ApplicationUser>();
             app.UseCors("AllowSpecificOrigins");
             app.UseHttpsRedirection();
 
