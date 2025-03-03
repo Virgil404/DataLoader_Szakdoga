@@ -40,7 +40,7 @@ namespace DataloaderApi.Dao
 
         public async Task<bool> ChangePassword(string username, string Password)
         {
-
+           
             var user = await GetUserByUserName(username);
             if (user == null) return false;
             await userManager.ResetPasswordAsync(user, userManager.GeneratePasswordResetTokenAsync(user).Result, Password);

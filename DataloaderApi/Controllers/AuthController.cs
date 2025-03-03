@@ -16,9 +16,9 @@ namespace DataloaderApi.Controllers
         private readonly IAuthHandlingDao _authHandling;
 
         // private readonly TokenProvider _tokenProvider;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IdentityContext _identityContext;
-        public AuthController(IAuthHandlingDao authHandling, UserManager<IdentityUser> userManager, IdentityContext identityContext)
+        public AuthController(IAuthHandlingDao authHandling, UserManager<ApplicationUser> userManager, IdentityContext identityContext)
         {
             _authHandling = authHandling;
             this.userManager = userManager;
@@ -62,7 +62,7 @@ namespace DataloaderApi.Controllers
             {
                 return BadRequest("User not found");
             }
-
+            
             var userroles = await userManager.GetRolesAsync(currentuser);
 
             var user = new UserDTO
