@@ -99,10 +99,21 @@ namespace DataloaderApi.Dao
             }
         }
         
-        public async Task<bool> changeRole(string username)
+        public async Task<bool> changeRole(string username, string role)
         {
+            try { 
+            var user = await GetUserByUserName(username);
 
-            throw new NotImplementedException();
+            var userrole = await userManager.GetRolesAsync(user);
+               
+           await  userManager.RemoveFromRoleAsync(user, userrole[0]);
+            await userManager.AddToRoleAsync(user, role);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
         }
     }
