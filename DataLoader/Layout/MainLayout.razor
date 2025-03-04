@@ -16,8 +16,13 @@
             <AuthorizeView>
 
                 <Authorized>
-                    Welcome  <p>@context.User.Identity.Name</p>  
-                    <button class="btn btn-primary" @onclick="Logout">Log out</button>
+                    
+                        @context.User.Identity.Name
+
+                    <button class="btn btn-primary" style="margin-left:20px" @onclick="Logout">Log out</button>
+                 
+
+                   
                 </Authorized>
                 <NotAuthorized>
                    <LoginRedirect/>

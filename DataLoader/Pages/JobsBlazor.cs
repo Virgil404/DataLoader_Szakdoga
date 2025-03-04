@@ -19,8 +19,9 @@ namespace DataLoader.Pages
 
         public string delimiter { get; set; }
         public string tablename { get; set; }
+        public string description { get; set; }
 
-        public bool alert { get; set; }
+        //public bool alert { get; set; }
 
         public string crontext { get; set; }
 
@@ -29,6 +30,9 @@ namespace DataLoader.Pages
         public bool UseCron { get; set; }
        public TaskDTO task { get; set;}
       public List<TaskDTO> tasks { get; set; }
+      
+       public DetailedTaskDTO detailedTask { get; set; }
+        public List<DetailedTaskDTO> detailedTasks { get; set; }
 
 
         public Dictionary<string, string> CronMap = new Dictionary<string, string>
@@ -45,7 +49,7 @@ namespace DataLoader.Pages
         protected override async Task OnInitializedAsync()
         {
           tasks = await taskSchedulerService.GetTasks();
-
+          detailedTasks= await taskSchedulerService.GetTasksAssignedToUser();
         }
 
 
@@ -77,7 +81,7 @@ namespace DataLoader.Pages
                 
             }
 
-            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) {
+            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null|| description==null) {
 
                 NotificationService.Notify(new NotificationMessage
                 { Severity = NotificationSeverity.Warning, Summary = "Task Not Created", 
@@ -90,7 +94,7 @@ namespace DataLoader.Pages
 
 
 
-           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename);
+           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename,description);
             NotificationService.Notify(new NotificationMessage
             { Severity = NotificationSeverity.Success, Summary = "Task Created Successfully", Detail = $"{Jobname} created successfully", Duration = 6000 });
             //alert = true;
@@ -100,6 +104,7 @@ namespace DataLoader.Pages
         public async Task RefreshList()
         {
             tasks = await taskSchedulerService.GetTasks();
+            detailedTasks = await taskSchedulerService.GetTasksAssignedToUser();
             StateHasChanged(); 
         }
 

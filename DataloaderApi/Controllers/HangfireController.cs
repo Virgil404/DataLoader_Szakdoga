@@ -47,7 +47,7 @@ namespace DataloaderApi.Controllers
 
         [Authorize]
         [HttpPost("CreateTask")]
-        public async Task<ActionResult> createTask(string cron, string jobname, string filePath, string delimiter, bool hasheader, string tableName)
+        public async Task<ActionResult> createTask(string cron, string jobname, string filePath, string delimiter, bool hasheader, string tableName, string description)
         {
             try {
                 var recurringJobs = Hangfire.JobStorage.Current.GetConnection().GetRecurringJobs();
@@ -55,7 +55,7 @@ namespace DataloaderApi.Controllers
                 var currentuser = await _userManager.GetUserAsync(User);
                 if (!jobexists)
                 {
-                    await _dataProcess.InsertToTaskData(jobname, filePath, tableName,currentuser);
+                    await _dataProcess.InsertToTaskData(jobname, filePath, tableName,currentuser, description);
                 }
                 CreateRecurringJob(cron, jobname, filePath, delimiter, hasheader, tableName);
                 return Ok("Task Created");

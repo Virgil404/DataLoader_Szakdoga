@@ -1,12 +1,9 @@
 ﻿using System.Data;
-using System.Reflection;
 using DataloaderApi;
 using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.Data;
 using DataloaderApi.DataRead;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
 
 public class DataProcess
 {
@@ -30,7 +27,7 @@ public class DataProcess
     }
 
 
-    public async Task InsertToTaskData(string jobname, string filepath , string tablename, ApplicationUser user )
+    public async Task InsertToTaskData(string jobname, string filepath , string tablename, ApplicationUser user, string description)
     {
         
         var taskdata = new TaskData
@@ -39,7 +36,7 @@ public class DataProcess
             sourceLocation = filepath,
             DestinationTable = tablename,
             AssignedUsers = new List<ApplicationUser> { user },
-            TaskDescription ="Test"
+            TaskDescription = description
             
         };
 
