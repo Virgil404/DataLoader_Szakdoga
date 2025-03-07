@@ -39,7 +39,7 @@ namespace DataloaderApi.Controllers
                 var result = await _authHandling.CreateUser(registerDTO);
 
                 if (result) return Ok();
-                return BadRequest(result);
+                return BadRequest("Error During stuff");
 
 
             }

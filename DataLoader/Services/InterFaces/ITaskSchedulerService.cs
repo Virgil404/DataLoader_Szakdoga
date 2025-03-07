@@ -5,7 +5,7 @@ namespace DataLoader.Services.InterFaces
     public interface ITaskSchedulerService
     {
 
-        public Task<List<TaskDTO>> GetTasks();
+        public Task<List<DetailedTaskDTO>> GetTasks();
 
         public Task<List<DetailedTaskDTO>> GetTasksAssignedToUser();
 

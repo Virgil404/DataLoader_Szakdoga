@@ -4,6 +4,7 @@ using DataLoader.Services.InterFaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
+using System.Text.RegularExpressions;
 
 namespace DataLoader.Pages
 {
@@ -29,10 +30,10 @@ namespace DataLoader.Pages
         public bool retriggerlert { get; set; }
         public  bool BadAlert {  get; set; } 
         public bool UseCron { get; set; }
-       public TaskDTO task { get; set;}
-      public List<TaskDTO> tasks { get; set; }
+       public DetailedTaskDTO task { get; set;}
+      public List<DetailedTaskDTO> tasks { get; set; }
       
-       public DetailedTaskDTO detailedTask { get; set; }
+       public DetailedTaskDTO TasksAssignedToCurrentuser { get; set; }
         public List<DetailedTaskDTO> detailedTasks { get; set; }
 
 
@@ -82,6 +83,19 @@ namespace DataLoader.Pages
                 
             }
 
+            if (!IsCronValid(cron))
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Task Not Created",
+                    Detail = $"Invalid Cron Expression",
+                    Duration = 6000
+                }); 
+                return;
+            }
+
+
             if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null|| description==null) {
 
                 NotificationService.Notify(new NotificationMessage
@@ -101,7 +115,21 @@ namespace DataLoader.Pages
             //alert = true;
         }
 
+        private  bool IsCronValid(string cron)
+        {
+            if (string.IsNullOrWhiteSpace(cron))
+            {
+                return false;
+            }
 
+            var cronPattern = @"^(\*|([0-5]?\d)(-[0-5]?\d)?(\/[0-5]?\d)?(,[0-5]?\d)*)\s" +     // Minute (0-59)
+                              @"(\*|([0-1]?\d|2[0-3])(-([0-1]?\d|2[0-3]))?(\/([0-1]?\d|2[0-3]))?(,([0-1]?\d|2[0-3]))*)\s" + // Hour (0-23)
+                              @"(\*|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?(\/([1-9]|[12]\d|3[01]))?(,([1-9]|[12]\d|3[01]))*)\s" + // Day of Month (1-31)
+                              @"(\*|(1[0-2]|0?[1-9])(-([1-9]|1[0-2]))?(\/([1-9]|1[0-2]))?(,(1[0-2]|0?[1-9]))*)\s" + // Month (1-12)
+                              @"(\*|([0-6])(-([0-6]))?(\/([0-6]))?(,([0-6]))*)$"; // Day of Week (0-6)
+
+            return Regex.IsMatch(cron, cronPattern, RegexOptions.IgnoreCase);
+        }
         public async Task RefreshList()
         {
             tasks = await taskSchedulerService.GetTasks();

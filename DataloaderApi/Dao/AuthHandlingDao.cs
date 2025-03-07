@@ -24,8 +24,17 @@ namespace DataloaderApi.Dao
         }
 
         public async Task<bool> CreateUser(RegisterDTO registerDTO)
-        {
+         {
+
+            try { 
           
+                var userexist = await userExitsWithUserName(registerDTO.username);
+                if (userexist)
+                {
+                    throw new Exception("User Alredy Created");
+                }
+
+
             var result = await userManager.CreateAsync(new ApplicationUser { Email = registerDTO.email, UserName = registerDTO.username }, registerDTO.password);
 
             if (result.Succeeded)
@@ -33,9 +42,15 @@ namespace DataloaderApi.Dao
                 await userManager.AddToRoleAsync(await userManager.FindByNameAsync(registerDTO.username), registerDTO.role);
                 return true;
             }
-            return false;
+                var errors = result.Errors.ToList();
+                var errorsastring = String.Join(",", errors);
+             throw new Exception(errorsastring);
+            }
+            catch (Exception ex)
+            {
 
-
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task assignUserToTask(string jobname, string username)

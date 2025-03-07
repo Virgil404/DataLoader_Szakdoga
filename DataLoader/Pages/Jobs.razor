@@ -85,23 +85,26 @@
 <AuthorizeView Roles="Admin">
 
 	<Authorized>
-
-		<RadzenButton ButtonStyle="ButtonStyle.Light" Style=" margin-top: 20px "  Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
+		<RadzenButton ButtonStyle="ButtonStyle.Light" Style=" margin-top: 20px " Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
 
 
 		<RadzenCard class="rz-my-6">
 			<p style="margin-bottom: 5px "> <b>List of the jobs</b> </p>
 
 			<div class="table-responsive">
-				<table class="table table-bordered table-hover table-responsive">
+				<table class="table table-bordered table-hover">
 
 					<thead class="table-dark">
 						<tr>
 							<th scope="col">Name</th>
+							<th scope="col">Description</th>
+							<th scope="col">Source Location</th>
+							<th scope="col">Destination Location</th>
 							<th scope="col">Cron</th>
 							<th scope="col">Created At</th>
 							<th scope="col">Last Execution</th>
 							<th scope="col">Next Execution</th>
+
 							<th scope="col">Actions</th>
 						</tr>
 					</thead>
@@ -111,8 +114,11 @@
 						{
 							@foreach (var task in tasks)
 							{
-								<tr>
+								<tr @ondblclick="()=>FillfieldsifClicked(task.JobID,task.TaskDescription,task.sourceLocation,task.DestinationTable,task.Cron)">
 									<td>@task.JobID</td>
+									<td>@task.TaskDescription</td>
+									<td>@task.sourceLocation</td>
+									<td>@task.DestinationTable</td>
 									<td>@task.Cron</td>
 									<td>@task.CratedAt</td>
 									<td>@task.LastExecution</td>
@@ -120,21 +126,21 @@
 									<td>
 
 										<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
-										Click=@(async args =>
-							  {
-							  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete Task",
-							  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
-							  if (confirmed == true)
-							  {
-								await Delete(task.JobID);
-							  }
-							  }) />
+													  Click=@(async args =>
+											  {
+											  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete Task",
+											  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+											  if (confirmed == true)
+											  {
+											  await Delete(task.JobID);
+											  }
+											  }) />
 
 
 										<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>-->
 
-										<RadzenButton Icon="refresh" Text = "Trigger"  ButtonStyle="ButtonStyle.Success"  Click="()=> Trigger(task.JobID)"></RadzenButton>
-										<RadzenButton Icon="refresh" Text="Trigger" ButtonStyle="ButtonStyle.Primary" Click="()=> Trigger(task.JobID)"></RadzenButton>
+										<RadzenButton Icon="refresh" Text="Trigger" ButtonStyle="ButtonStyle.Success" Click="()=> Trigger(task.JobID)"></RadzenButton>
+										<RadzenButton Icon="refresh" Text="Assign User" ButtonStyle="ButtonStyle.Primary" Click="()=> ShowInlineDialog(task.JobID)"></RadzenButton>
 
 									</td>
 								</tr>
@@ -188,7 +194,7 @@
 					</thead>
 					<tbody>
 
-						@if (tasks != null)
+						@if (detailedTasks != null)
 						{
 							@foreach (var task in detailedTasks)
 							{

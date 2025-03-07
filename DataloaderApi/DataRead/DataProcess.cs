@@ -27,9 +27,9 @@ public class DataProcess
     }
 
 
-    public async Task InsertToTaskData(string jobname, string filepath , string tablename, ApplicationUser user, string description)
+    public async Task InsertToTaskData(string jobname, string filepath, string tablename, ApplicationUser user, string description)
     {
-        
+
         var taskdata = new TaskData
         {
             TaskName = jobname,
@@ -37,12 +37,12 @@ public class DataProcess
             DestinationTable = tablename,
             AssignedUsers = new List<ApplicationUser> { user },
             TaskDescription = description
-            
+
         };
 
-       await _context.TaskData.AddAsync(taskdata);
+        await _context.TaskData.AddAsync(taskdata);
 
-      await  _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
     }
 
     public async Task deleteTaskData(string jobname)
@@ -67,32 +67,33 @@ public class DataProcess
             await _context.SaveChangesAsync();
         }
     }
-    
 
-    public async Task  readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
+
+    public async Task readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
-        try { 
-        
-            if (!ModelMap.TryGetValue(tableName, out Type modelType)) 
+        try
+        {
+
+            if (!ModelMap.TryGetValue(tableName, out Type modelType))
             {
                 Console.WriteLine($"Error: No model found for table '{tableName}'");
                 throw new Exception($"Error: No model found for table '{tableName}'");
             }
 
-          
+
 
             dynamic dataReader = Activator.CreateInstance(typeof(DataReader<>).MakeGenericType(modelType));
             var dataList = dataReader.readDataNewFile(filepath, delimiter, hasheader);
 
             var dbHandler = _serviceProvider.GetRequiredService(typeof(ICsvLoadDao<>).MakeGenericType(modelType));
 
-           await ((dynamic)dbHandler).insertWithSQLBULK(dataList, tableName);
+            await ((dynamic)dbHandler).insertWithSQLBULK(dataList, tableName);
 
             Console.WriteLine("Insert complete.");
 
-         
+
         }
-        catch  { throw  ; }
+        catch { throw; }
     }
 
 
@@ -131,4 +132,22 @@ public class DataProcess
             return null;
         }
     }
+    public List<TaskData> getAllTaskData()
+    {
+        try
+        {
+            var tasks = _context.TaskData.ToList();
+            return tasks;
+        }
+
+
+
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return null;
+        }
+
+    }
+
 }

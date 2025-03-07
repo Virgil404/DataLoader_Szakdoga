@@ -95,11 +95,11 @@ namespace DataLoader.Services
             catch (Exception) { throw; }
         }
 
-        public async Task<List<TaskDTO>> GetTasks()
+        public async Task<List<DetailedTaskDTO>> GetTasks()
         {
             try
             {
-                var Joblist = await httpClient.GetFromJsonAsync<List<TaskDTO>>("api/Hangfire/getRecurrningJobs");
+                var Joblist = await httpClient.GetFromJsonAsync<List<DetailedTaskDTO>>("api/Hangfire/getRecurrningJobs");
 
                 return Joblist;
 

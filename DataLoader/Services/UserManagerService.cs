@@ -42,7 +42,7 @@ namespace DataLoader.Services
             Console.WriteLine("Response: " + response);
             if (!response.IsSuccessStatusCode)
             {
-                string error = response.ReasonPhrase;
+                string error = await response.Content.ReadAsStringAsync();
                 throw new Exception(error);
             }
 

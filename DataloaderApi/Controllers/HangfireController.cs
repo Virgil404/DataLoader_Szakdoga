@@ -35,9 +35,9 @@ namespace DataloaderApi.Controllers
                 RecurringJob.AddOrUpdate(jobname, () => _dataProcess.readAndInsert(filepath, delimiter, hasheader, tableName), cron);
             }
             catch (Exception ex) {
-                throw ex;
-                    
-                 }
+                throw;
+
+            }
 
         }
 
@@ -94,22 +94,35 @@ namespace DataloaderApi.Controllers
 
          
         [HttpGet("getRecurrningJobs")]
-        public async Task<ActionResult<List<RecurringJobDto>>> getrecurringjobs()
+        public async Task<ActionResult<List<DetailedTaskDTO>>> getrecurringjobs()
         {
 
            
             try {
             var joblist = new List<RecurringJobDto>();
-             var jobdtolist = new List<TaskDTO>();
+             var jobdtolist = new List<DetailedTaskDTO>();
+              
             joblist =  Hangfire.JobStorage.Current.GetConnection().GetRecurringJobs().ToList();
+            var tasklist = _dataProcess.getAllTaskData();
+
 
 
                 foreach (var job in joblist) {
 
+                    jobdtolist.Add(new DetailedTaskDTO
+                    {
+                        JobID = job.Id.ToString(),
+                        TaskDescription = tasklist.Where(x => x.TaskName == job.Id).FirstOrDefault().TaskDescription,
+                        CratedAt = job.CreatedAt.ToString(),
+                        LastExecution = job.LastExecution.ToString(),
+                        NextExecution = job.NextExecution.ToString(),
+                        Cron = job.Cron.ToString(),
+                        sourceLocation = tasklist.Where(x => x.TaskName == job.Id).FirstOrDefault().sourceLocation,
+                        DestinationTable = tasklist.Where(x => x.TaskName == job.Id).FirstOrDefault().DestinationTable
+                    });
 
-                   
-                    jobdtolist.Add(new TaskDTO(job.CreatedAt.ToString(),job.LastExecution.ToString(),job.NextExecution.ToString(),job.Id.ToString(), job.Cron.ToString()));
-                
+
+
                 }
 
             return Ok(jobdtolist);
