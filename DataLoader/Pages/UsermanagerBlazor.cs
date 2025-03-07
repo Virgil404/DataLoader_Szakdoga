@@ -6,6 +6,7 @@
     using Microsoft.AspNetCore.Components;
     using Radzen;
     using Microsoft.IdentityModel.Tokens;
+    using System.Text.RegularExpressions;
 
     public class UsermanagerBlazor: ComponentBase
     {
@@ -31,6 +32,21 @@
         public async Task CreateUser()
         {
             try {
+
+                if (password.Length<5)
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    { Severity = NotificationSeverity.Warning, Summary = "User Not created", Detail = "Password must be at least 5 character", Duration = 6000 });
+                    return;
+                }
+
+                if (!isEmailValid(email))
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "User Not Created", Detail = "Email is not valid", Duration = 6000 });
+                    return;
+                }
+
+
                 var user = new RegisterDTO
                 {
 
@@ -44,13 +60,33 @@
                 NotificationService.Notify(new NotificationMessage
                 { Severity = NotificationSeverity.Success, Summary = "User created", Detail = $"User created with {username} username", Duration = 6000 });
             }
-            catch
+            catch(Exception ex)
             {
                 NotificationService.Notify(new NotificationMessage
-                { Severity = NotificationSeverity.Warning, Summary = "User Not created", Detail = $"user {username} alredy exists", Duration = 6000 });
+                { Severity = NotificationSeverity.Warning, Summary = "User Not created", Detail = $"Problem: {ex.Message}", Duration = 6000 });
 
 
             }
+        }
+
+        private bool isEmailValid(string email)
+        {
+            if (String.IsNullOrEmpty(email))
+            {
+                return false; 
+            }
+
+            try
+            {
+                var emailPattern= @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+                return Regex.IsMatch(email, emailPattern, RegexOptions.IgnoreCase);
+            }
+            catch 
+            {
+
+                return false;
+            }
+
         }
 
         public async Task RefreshList()

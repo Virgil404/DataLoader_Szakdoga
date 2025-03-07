@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DataloaderApi.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityAuthTest.Services
 {
@@ -8,7 +9,7 @@ namespace IdentityAuthTest.Services
         {
 
 
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             string[] roleNames = { "Admin", "User"};
 
@@ -27,7 +28,7 @@ namespace IdentityAuthTest.Services
 
             var admin = await userManager.GetUsersInRoleAsync("Admin");
 
-            var adminuser = new IdentityUser
+            var adminuser = new ApplicationUser
             {
 
                 Email = "sanyikafasza@kkkk.com",

@@ -12,98 +12,205 @@
 
 
 
-<RadzenCard class="rz-my-6">
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+		<RadzenCard class="rz-my-6">
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Wrap="FlexWrap.Wrap">
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
 
-			<label> JobName</label>
-			<InputText @bind-Value="Jobname" DisplayName="Job Name"> </InputText>
-		</RadzenStack>
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			<label> Use Cron</label>
-			<InputCheckbox @bind-Value="UseCron"> use Cron </InputCheckbox>
-		</RadzenStack>
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			@if (UseCron)
-			{
-				
-					<label> Cron </label>
-					<InputText @bind-Value="cron" DisplayName="Cron"></InputText>
-				
-			}
-			else
-			{
+					<label> JobName</label>
+					<InputText @bind-Value="Jobname" DisplayName="Job Name"> </InputText>
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
 
-				
-					<label> Cron </label>
+					<label> Description</label>
+					<InputText @bind-Value="description" DisplayName="Description"> </InputText>
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label> Use Cron</label>
+					<InputCheckbox @bind-Value="UseCron"> use Cron </InputCheckbox>
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					@if (UseCron)
+					{
 
-					<select class="form-control" @bind=crontext>
-						<option></option>
-						@foreach (var value in CronMap)
+						<label> Cron </label>
+						<InputText @bind-Value="cron" DisplayName="Cron"></InputText>
+
+					}
+					else
+					{
+
+
+						<label> Cron </label>
+
+						<select class="form-control" @bind=crontext>
+							<option></option>
+							@foreach (var value in CronMap)
+							{
+
+								<option>@value.Key.ToString()</option>
+
+							}
+
+						</select>
+
+					}
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label> FilePath</label>
+					<InputText @bind-Value="filepath"></InputText>
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label>Delimiter</label>
+					<InputText @bind-Value="delimiter"> </InputText>
+				</RadzenStack>
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label> TableName</label>
+					<InputText @bind-Value="tablename"></InputText>
+				</RadzenStack>
+
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<RadzenButton ButtonStyle="ButtonStyle.Primary" Style="margin-top: 25px;" Icon="add_circle" Text="Create Task" Click="createTask"> </RadzenButton>
+				</RadzenStack>
+
+			</RadzenStack>
+		</RadzenCard>
+
+	</Authorized>
+
+	<NotAuthorized>
+		<LoginRedirect></LoginRedirect>
+	</NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
+
+	<Authorized>
+		<RadzenButton ButtonStyle="ButtonStyle.Light" Style=" margin-top: 20px " Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
+
+
+		<RadzenCard class="rz-my-6">
+			<p style="margin-bottom: 5px "> <b>List of the jobs</b> </p>
+
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+
+					<thead class="table-dark">
+						<tr>
+							<th scope="col">Name</th>
+							<th scope="col">Description</th>
+							<th scope="col">Source Location</th>
+							<th scope="col">Destination Location</th>
+							<th scope="col">Cron</th>
+							<th scope="col">Created At</th>
+							<th scope="col">Last Execution</th>
+							<th scope="col">Next Execution</th>
+
+							<th scope="col">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						@if (tasks != null)
 						{
+							@foreach (var task in tasks)
+							{
+								<tr @ondblclick="()=>FillfieldsifClicked(task.JobID,task.TaskDescription,task.sourceLocation,task.DestinationTable,task.Cron)">
+									<td>@task.JobID</td>
+									<td>@task.TaskDescription</td>
+									<td>@task.sourceLocation</td>
+									<td>@task.DestinationTable</td>
+									<td>@task.Cron</td>
+									<td>@task.CratedAt</td>
+									<td>@task.LastExecution</td>
+									<td>@task.NextExecution</td>
+									<td>
 
-							<option>@value.Key.ToString()</option>
+										<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
+													  Click=@(async args =>
+											  {
+											  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete Task",
+											  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+											  if (confirmed == true)
+											  {
+											  await Delete(task.JobID);
+											  }
+											  }) />
 
+
+										<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>-->
+
+										<RadzenButton Icon="refresh" Text="Trigger" ButtonStyle="ButtonStyle.Success" Click="()=> Trigger(task.JobID)"></RadzenButton>
+										<RadzenButton Icon="refresh" Text="Assign User" ButtonStyle="ButtonStyle.Primary" Click="()=> ShowInlineDialog(task.JobID)"></RadzenButton>
+
+									</td>
+								</tr>
+							}
+						}
+						else
+						{
+							<tr><td colspan="6">Loading jobs</td></tr>
 						}
 
-					</select>
-				
-			}
-		</RadzenStack>
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			<label> FilePath</label>
-			<InputText @bind-Value="filepath"></InputText>
-		</RadzenStack>
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			<label>Delimiter</label>
-			<InputText @bind-Value="delimiter"> </InputText>
-		</RadzenStack>
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			<label> TableName</label>
-			<InputText @bind-Value="tablename"></InputText>
-		</RadzenStack>
 
-		<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
-			<RadzenButton ButtonStyle="ButtonStyle.Primary" Style="margin-top: 25px;" Icon="add_circle" Text="Create Task" Click="createTask"> </RadzenButton>
-		</RadzenStack>
+					</tbody>
+				</table>
+			</div>
+		</RadzenCard>
+	</Authorized>
+	<NotAuthorized>
 
-	</RadzenStack>
-</RadzenCard>
+	</NotAuthorized>
 
-<RadzenButton ButtonStyle="ButtonStyle.Light" Style=" margin-top: 20px "  Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
+</AuthorizeView>
 
 
-<RadzenCard class="rz-my-6">
-	<p style="margin-bottom: 5px "> <b>List of the jobs</b> </p>
 
-<table class="table table-bordered table-hover">
-	
-	<thead>
-		<tr>
-			<th scope="col">Name</th>
-			<th scope="col">Cron</th>
-			<th scope="col">Created At</th>
-			<th scope="col">Last Execution</th>
-			<th scope="col">Next Execution</th>
-			<th scope="col">Actions</th>
-		</tr>
-	</thead>
-	<tbody>
+<AuthorizeView Roles="User">
 
-		@if (tasks != null)
-		{
-			@foreach (var task in tasks)
-			{
-				<tr>
-					<td>@task.JobID</td>
-					<td>@task.Cron</td>
-					<td>@task.CratedAt</td>
-					<td>@task.LastExecution</td>
-					<td>@task.NextExecution</td>
-					<td>
 
-						<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
-									  Click=@(async args =>
+	<Authorized>
+		<RadzenButton ButtonStyle="ButtonStyle.Light" Style=" margin-top: 20px "  Icon="cached" Text="Refresh List" Click="RefreshList"> </RadzenButton>
+
+
+		<RadzenCard class="rz-my-6">
+			<p style="margin-bottom: 5px "> <b>List of the jobs</b> </p>
+
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+
+					<thead class="table-dark">
+						<tr>
+							<th scope="col">Name</th>
+							<th scope="col">Description</th>
+							<th scope="col">Source Location</th>
+							<th scope="col">Destination Location</th>
+							<th scope="col">Cron</th>
+							<th scope="col">Created At</th>
+							<th scope="col">Last Execution</th>
+							<th scope="col">Next Execution</th>
+
+							<th scope="col">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						@if (detailedTasks != null)
+						{
+							@foreach (var task in detailedTasks)
+							{
+								<tr @ondblclick="()=>FillfieldsifClicked(task.JobID,task.TaskDescription,task.sourceLocation,task.DestinationTable,task.Cron)">
+									<td>@task.JobID</td>
+									<td>@task.TaskDescription</td>
+									<td>@task.sourceLocation</td>
+									<td>@task.DestinationTable</td>
+									<td>@task.Cron</td>
+									<td>@task.CratedAt</td>
+									<td>@task.LastExecution</td>
+									<td>@task.NextExecution</td>
+									<td>
+
+										<RadzenButton Text="Delete" Icon="delete" ButtonStyle="ButtonStyle.Secondary"
+										Click=@(async args =>
 							  {
 							  bool? confirmed = await DialogService.Confirm("Are you sure?", "Delete Task",
 							  new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
@@ -114,29 +221,51 @@
 							  }) />
 
 
-						<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>-->
+										<!--<button type="button" class="btn btn-danger" @onclick="() => Delete(task.JobID)">Delete</button>-->
 
-						<RadzenButton Icon="refresh" Text = "Trigger"  ButtonStyle="ButtonStyle.Success"  Click="()=> Trigger(task.JobID)"></RadzenButton>
-					</td>
-				</tr>
-			}
-		}
-		else
-		{
-			<tr><td colspan="6">Loading jobs</td></tr>
-		}
+										<RadzenButton Icon="refresh" Text = "Trigger"  ButtonStyle="ButtonStyle.Success"  Click="()=> Trigger(task.JobID)"></RadzenButton>
+										<RadzenButton Icon="refresh" Text="Assign User" ButtonStyle="ButtonStyle.Primary" Click="()=> ShowInlineDialog(task.JobID)"></RadzenButton>
 
-		
-	</tbody>
-</table>
-</RadzenCard>
+									</td>
+								</tr>
+							}
+						}
+						else
+						{
+							<tr><td colspan="6">Loading jobs</td></tr>
+						}
+
+
+					</tbody>
+				</table>
+			</div>
+		</RadzenCard>
 	</Authorized>
-	<NotAuthorized>
-		<LoginRedirect></LoginRedirect>
-	</NotAuthorized>
+
 
 </AuthorizeView>
 
+
+
+
+
 @code {
+
+	private async Task ShowInlineDialog(string jobid){
+	var result = await DialogService.OpenAsync("Assign user", ds =>
+	@<RadzenStack Gap="1.5rem">
+		<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+			<p>Assign user</p>
+			<RadzenStack Orientation="Orientation.Horizontal">
+			 <RadzenTextBox @bind-Value="userToassign" ></RadzenTextBox>
+				<RadzenButton Text="Ok" Click="async () => {await AssingUserToTask(userToassign, jobid); ds.Close(true); }" Style="width: 80px;" />
+				<RadzenButton Text="Cancel" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+			</RadzenStack>
+
+		</RadzenStack>
+	</RadzenStack>);
+
+
+	}
 
 }

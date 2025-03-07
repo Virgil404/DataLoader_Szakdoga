@@ -4,6 +4,7 @@ using DataLoader.Services.InterFaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.IdentityModel.Tokens;
 using Radzen;
+using System.Text.RegularExpressions;
 
 namespace DataLoader.Pages
 {
@@ -19,16 +20,21 @@ namespace DataLoader.Pages
 
         public string delimiter { get; set; }
         public string tablename { get; set; }
+        public string description { get; set; }
+        public string userToassign { get; set; }
 
-        public bool alert { get; set; }
+        //public bool alert { get; set; }
 
         public string crontext { get; set; }
 
         public bool retriggerlert { get; set; }
         public  bool BadAlert {  get; set; } 
         public bool UseCron { get; set; }
-       public TaskDTO task { get; set;}
-      public List<TaskDTO> tasks { get; set; }
+       public DetailedTaskDTO task { get; set;}
+      public List<DetailedTaskDTO> tasks { get; set; }
+      
+       public DetailedTaskDTO TasksAssignedToCurrentuser { get; set; }
+        public List<DetailedTaskDTO> detailedTasks { get; set; }
 
 
         public Dictionary<string, string> CronMap = new Dictionary<string, string>
@@ -45,7 +51,7 @@ namespace DataLoader.Pages
         protected override async Task OnInitializedAsync()
         {
           tasks = await taskSchedulerService.GetTasks();
-
+          detailedTasks= await taskSchedulerService.GetTasksAssignedToUser();
         }
 
 
@@ -77,7 +83,20 @@ namespace DataLoader.Pages
                 
             }
 
-            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null) {
+            if (!IsCronValid(cron))
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Task Not Created",
+                    Detail = $"Invalid Cron Expression",
+                    Duration = 6000
+                }); 
+                return;
+            }
+
+
+            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null|| description==null) {
 
                 NotificationService.Notify(new NotificationMessage
                 { Severity = NotificationSeverity.Warning, Summary = "Task Not Created", 
@@ -90,16 +109,31 @@ namespace DataLoader.Pages
 
 
 
-           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename);
+           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename,description);
             NotificationService.Notify(new NotificationMessage
             { Severity = NotificationSeverity.Success, Summary = "Task Created Successfully", Detail = $"{Jobname} created successfully", Duration = 6000 });
             //alert = true;
         }
 
+        private  bool IsCronValid(string cron)
+        {
+            if (string.IsNullOrWhiteSpace(cron))
+            {
+                return false;
+            }
 
+            var cronPattern = @"^(\*|([0-5]?\d)(-[0-5]?\d)?(\/[0-5]?\d)?(,[0-5]?\d)*)\s" +     // Minute (0-59)
+                              @"(\*|([0-1]?\d|2[0-3])(-([0-1]?\d|2[0-3]))?(\/([0-1]?\d|2[0-3]))?(,([0-1]?\d|2[0-3]))*)\s" + // Hour (0-23)
+                              @"(\*|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?(\/([1-9]|[12]\d|3[01]))?(,([1-9]|[12]\d|3[01]))*)\s" + // Day of Month (1-31)
+                              @"(\*|(1[0-2]|0?[1-9])(-([1-9]|1[0-2]))?(\/([1-9]|1[0-2]))?(,(1[0-2]|0?[1-9]))*)\s" + // Month (1-12)
+                              @"(\*|([0-6])(-([0-6]))?(\/([0-6]))?(,([0-6]))*)$"; // Day of Week (0-6)
+
+            return Regex.IsMatch(cron, cronPattern, RegexOptions.IgnoreCase);
+        }
         public async Task RefreshList()
         {
             tasks = await taskSchedulerService.GetTasks();
+            detailedTasks = await taskSchedulerService.GetTasksAssignedToUser();
             StateHasChanged(); 
         }
 
@@ -124,6 +158,36 @@ namespace DataLoader.Pages
 
         }
 
+
+        public async Task AssingUserToTask(string username, string taskid)
+
+
+        {
+            try { 
+            await taskSchedulerService.AssignUser(taskid, username);
+
+                NotificationService.Notify(new NotificationMessage
+                { Severity = NotificationSeverity.Success, Summary = "User Added", Detail = $"{username} Added To task successfully", Duration = 6000 });
+                // retriggerlert= true
+            }
+            catch(Exception e )
+            {
+                NotificationService.Notify(new NotificationMessage
+                { Severity = NotificationSeverity.Warning, Summary = "User Not Added", Detail = e.Message, Duration = 6000 });
+            }
+        }
+
+
+        public void FillfieldsifClicked(string _jobid, string _description , string _sourcelocation, string _destinationTable, string _cron)
+        {
+            Jobname = _jobid;
+            description = _description;
+            filepath = _sourcelocation;
+            tablename = _destinationTable;
+            cron = _cron;
+            UseCron = true;
+
+        }
 
     }
 }

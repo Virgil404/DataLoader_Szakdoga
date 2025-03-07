@@ -17,7 +17,8 @@ namespace DataloaderApi.Dao.Interfaces
 
         public Task<List<UserDTO>> GetUsers();
 
-        public Task<bool> changeRole(string username);
-  
+        public Task<bool> changeRole(string username,string role);
+
+        public Task assignUserToTask(string jobname, string username);
     }
 }

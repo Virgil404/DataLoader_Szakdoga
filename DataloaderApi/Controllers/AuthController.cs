@@ -11,14 +11,14 @@ namespace DataloaderApi.Controllers
     [ApiController]
     public class AuthController : Controller
     {
-     
-        
+
+
         private readonly IAuthHandlingDao _authHandling;
 
         // private readonly TokenProvider _tokenProvider;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IdentityContext _identityContext;
-        public AuthController (IAuthHandlingDao authHandling, UserManager<IdentityUser> userManager, IdentityContext identityContext)
+        public AuthController(IAuthHandlingDao authHandling, UserManager<ApplicationUser> userManager, IdentityContext identityContext)
         {
             _authHandling = authHandling;
             this.userManager = userManager;
@@ -29,24 +29,25 @@ namespace DataloaderApi.Controllers
 
         // [Authorize]
         [HttpPost("createUser")]
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<bool>> createUser(RegisterDTO registerDTO)
         {
 
-            
+
             try
             {
-              var result =  await _authHandling.CreateUser(registerDTO);
+                var result = await _authHandling.CreateUser(registerDTO);
 
-                if(result) return Ok();
-                return BadRequest(result);
+                if (result) return Ok();
+                return BadRequest("Error During stuff");
 
 
             }
-            catch (Exception ex) { 
-            
+            catch (Exception ex)
+            {
+
                 return BadRequest(ex.Message);
-            
+
             }
 
         }
@@ -61,7 +62,7 @@ namespace DataloaderApi.Controllers
             {
                 return BadRequest("User not found");
             }
-
+            
             var userroles = await userManager.GetRolesAsync(currentuser);
 
             var user = new UserDTO
@@ -82,7 +83,7 @@ namespace DataloaderApi.Controllers
 
             try
             {
-               
+
                 var result = await _authHandling.GetUsers();
                 return Ok(result);
             }
@@ -116,7 +117,7 @@ namespace DataloaderApi.Controllers
 
         [HttpPut("ChangePassword")]
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<bool>> changePassword(string username, string password)
         {
             try
@@ -145,8 +146,29 @@ namespace DataloaderApi.Controllers
 
         }
 
+        [HttpPut("changeRole")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<bool>> changeRole(string username, string role)
+        {
+            try
+            {
+                var result = await _authHandling.changeRole(username, role);
+                if (result)
+                {
+                    Console.WriteLine("Role Changed");
+                    return Ok();
+                }
+                Console.WriteLine("Cannot Change Role");
+                return BadRequest("Cannot change Role");
 
 
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString);
+                return BadRequest();
+            }
+        }
     }
 }
