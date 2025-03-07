@@ -2,6 +2,7 @@
 using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataloaderApi.Dao
 {
@@ -37,6 +38,25 @@ namespace DataloaderApi.Dao
 
         }
 
+        public async Task assignUserToTask(string jobname, string username)
+        {
+            var user = await GetUserByUserName(username);
+            var taskdata = await _identityContext.TaskData
+                                    .Include(t => t.AssignedUsers) 
+                                    .FirstOrDefaultAsync(x => x.TaskName == jobname);
+
+            if (taskdata != null && user != null)
+            {
+                if (!taskdata.AssignedUsers.Contains(user))
+                {
+                    _identityContext.Attach(user);
+                    taskdata.AssignedUsers.Add(user);
+                    await _identityContext.SaveChangesAsync();
+                }
+                else throw new Exception("User alredy Assigned");
+            }
+            else throw new Exception("User or Task not exist");
+        }
 
         public async Task<bool> ChangePassword(string username, string Password)
         {

@@ -55,6 +55,20 @@ public class DataProcess
         }
     }
 
+    public async Task UpdateTaskData(string jobname, string filepath, string tablename, string description)
+    {
+        var taskdata = _context.TaskData.Where(x => x.TaskName == jobname).FirstOrDefault();
+        if (taskdata != null)
+        {
+            taskdata.TaskName = jobname;
+            taskdata.sourceLocation = filepath;
+            taskdata.DestinationTable = tablename;
+            taskdata.TaskDescription = description;
+            await _context.SaveChangesAsync();
+        }
+    }
+    
+
     public async Task  readAndInsert(string filepath, string delimiter, bool hasheader, string tableName)
     {
         try { 

@@ -15,5 +15,6 @@ namespace DataLoader.Services.InterFaces
 
         public Task TriggerTask(string jobID);
 
+        public Task AssignUser(string jobID, string username);
     }
 }

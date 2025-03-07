@@ -129,6 +129,27 @@ namespace DataLoader.Services
         }
 
 
+        public async Task AssignUser(string jobID, string username)
+        {
+            try
+            {
+                var url = $"api/Hangfire/AssignUsertotask?taskid={Uri.EscapeDataString(jobID)}&username={Uri.EscapeDataString(username)}";
+                var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+                using var response = await httpClient.PostAsync(url, content);
+                Console.WriteLine("Response: " + response);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new Exception(error);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task TriggerTask(string jobID)
         {
             try

@@ -20,6 +20,7 @@ namespace DataLoader.Pages
         public string delimiter { get; set; }
         public string tablename { get; set; }
         public string description { get; set; }
+        public string userToassign { get; set; }
 
         //public bool alert { get; set; }
 
@@ -129,6 +130,36 @@ namespace DataLoader.Pages
 
         }
 
+
+        public async Task AssingUserToTask(string username, string taskid)
+
+
+        {
+            try { 
+            await taskSchedulerService.AssignUser(taskid, username);
+
+                NotificationService.Notify(new NotificationMessage
+                { Severity = NotificationSeverity.Success, Summary = "User Added", Detail = $"{username} Added To task successfully", Duration = 6000 });
+                // retriggerlert= true
+            }
+            catch(Exception e )
+            {
+                NotificationService.Notify(new NotificationMessage
+                { Severity = NotificationSeverity.Warning, Summary = "User Not Added", Detail = e.Message, Duration = 6000 });
+            }
+        }
+
+
+        public void FillfieldsifClicked(string _jobid, string _description , string _sourcelocation, string _destinationTable, string _cron)
+        {
+            Jobname = _jobid;
+            description = _description;
+            filepath = _sourcelocation;
+            tablename = _destinationTable;
+            cron = _cron;
+            UseCron = true;
+
+        }
 
     }
 }

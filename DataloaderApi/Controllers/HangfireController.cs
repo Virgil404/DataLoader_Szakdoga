@@ -7,6 +7,8 @@ using Dataloader.Api.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using DataloaderApi.Data;
+using DataloaderApi.Dao;
+using DataloaderApi.Dao.Interfaces;
 namespace DataloaderApi.Controllers
 {
     [Route("api/[controller]")]
@@ -15,11 +17,13 @@ namespace DataloaderApi.Controllers
     {
         private readonly DataProcess _dataProcess;
         private readonly UserManager<ApplicationUser> _userManager;
-        public HangfireController(DataProcess dataProcess,UserManager<ApplicationUser> userManager)
+        private readonly IAuthHandlingDao _authHandlingDao;
+        public HangfireController(DataProcess dataProcess,UserManager<ApplicationUser> userManager, IAuthHandlingDao authHandlingDao)
         {
 
             _dataProcess = dataProcess;
             _userManager = userManager;
+            _authHandlingDao = authHandlingDao;
         }
 
 
@@ -56,6 +60,10 @@ namespace DataloaderApi.Controllers
                 if (!jobexists)
                 {
                     await _dataProcess.InsertToTaskData(jobname, filePath, tableName,currentuser, description);
+                }
+                else
+                {
+                    await _dataProcess.UpdateTaskData(jobname, filePath, tableName, description);
                 }
                 CreateRecurringJob(cron, jobname, filePath, delimiter, hasheader, tableName);
                 return Ok("Task Created");
@@ -186,5 +194,28 @@ namespace DataloaderApi.Controllers
 
             }
         }
+
+        
+
+        [Authorize]
+        [HttpPost("AssignUsertotask")]
+        public async Task<ActionResult> assignUser(string taskid, string username)
+        {
+            try
+            {
+                await _authHandlingDao.assignUserToTask(taskid, username);
+                return Ok();
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+
+
+
+        }
+        
     }
 }
