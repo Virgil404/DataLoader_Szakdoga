@@ -95,8 +95,32 @@ namespace DataLoader.Pages
                 return;
             }
 
+            if (!(tablename== "CrimeData"||tablename== "Customers"|| tablename== "Organizations"||tablename== "Products"))
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Task Not Created",
+                    Detail = $"Invalid table Name",
+                    Duration = 6000
+                });
+                return;
 
-            if (Jobname == null || cron == null || filepath == null || delimiter == null || tablename == null|| description==null) {
+            }
+            if (!isFolderValid(filepath))
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Task Not Created",
+                    Detail = $"Invalid Folder Path",
+                    Duration = 6000
+                });
+                return;
+            }
+
+
+            if ( String.IsNullOrEmpty(Jobname) || String.IsNullOrEmpty( cron)  ||String.IsNullOrEmpty(filepath)  || String.IsNullOrEmpty(delimiter) || String.IsNullOrEmpty(tablename)||String.IsNullOrEmpty( description)) {
 
                 NotificationService.Notify(new NotificationMessage
                 { Severity = NotificationSeverity.Warning, Summary = "Task Not Created", 
@@ -107,6 +131,7 @@ namespace DataLoader.Pages
                 return ;    
             }
 
+         //   Console.WriteLine("Jobname:" +(Jobname==null));
 
 
            await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename,description);
@@ -129,6 +154,17 @@ namespace DataLoader.Pages
                               @"(\*|([0-6])(-([0-6]))?(\/([0-6]))?(,([0-6]))*)$"; // Day of Week (0-6)
 
             return Regex.IsMatch(cron, cronPattern, RegexOptions.IgnoreCase);
+        }
+
+        private bool isFolderValid(string folder)
+        {
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                return false;
+            }
+            var folderPattern = @".+(?=\\)";
+            ;
+            return Regex.IsMatch(folder, folderPattern, RegexOptions.IgnoreCase);
         }
         public async Task RefreshList()
         {

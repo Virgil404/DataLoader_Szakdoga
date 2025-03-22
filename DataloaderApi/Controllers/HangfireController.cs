@@ -32,7 +32,7 @@ namespace DataloaderApi.Controllers
             try
             {
                 Console.WriteLine(jobname + " started");
-                RecurringJob.AddOrUpdate(jobname, () => _dataProcess.readAndInsert(filepath, delimiter, hasheader, tableName), cron);
+                RecurringJob.AddOrUpdate(jobname, () => _dataProcess.ExecuteJobAndNotify(jobname,filepath,delimiter,hasheader,tableName), cron);
             }
             catch (Exception ex) {
                 throw;
@@ -56,6 +56,7 @@ namespace DataloaderApi.Controllers
             try {
                 var recurringJobs = Hangfire.JobStorage.Current.GetConnection().GetRecurringJobs();
                 var jobexists = recurringJobs.Any(x => x.Id == jobname);
+                var usersAssignedToTask= _dataProcess.GetAssignedusers(jobname);
                 var currentuser = await _userManager.GetUserAsync(User);
                 if (!jobexists)
                 {

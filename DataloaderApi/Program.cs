@@ -6,6 +6,8 @@ using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.Data;
 using DataloaderApi.DataRead;
 using DataloaderApi.Extension;
+using DataloaderApi.Extension.Services;
+using DataloaderApi.Extension.Services.Interface;
 using Hangfire;
 using IdentityAuthTest.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -69,7 +71,7 @@ namespace DataloaderApi
 
             //Dependency Injection
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-
+            builder.Services.AddTransient<IEmaliSenderService, EmailService>();
             builder.Services.AddScoped(typeof(ICsvLoadDao<>), typeof(CsvLoaderDao<>));
             builder.Services.AddScoped(typeof(IAuthHandlingDao), typeof(AuthHandlingDao));
             builder.Services.AddScoped<DataProcess>();

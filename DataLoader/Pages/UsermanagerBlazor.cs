@@ -32,6 +32,11 @@
         public async Task CreateUser()
         {
             try {
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(role) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email))
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Invalid Input", Detail = "One or more required fields are empty", Duration = 6000 });
+                    return;
+                }
 
                 if (password.Length<5)
                 {
@@ -45,8 +50,7 @@
                     NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "User Not Created", Detail = "Email is not valid", Duration = 6000 });
                     return;
                 }
-
-
+            
                 var user = new RegisterDTO
                 {
 

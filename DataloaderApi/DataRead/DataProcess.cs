@@ -3,13 +3,18 @@ using DataloaderApi;
 using DataloaderApi.Dao.Interfaces;
 using DataloaderApi.Data;
 using DataloaderApi.DataRead;
+using DataloaderApi.Extension.Services;
+using DataloaderApi.Extension.Services.Interface;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 public class DataProcess
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IdentityContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmaliSenderService  _emailSender;
 
     private static readonly Dictionary<string, Type> ModelMap = new Dictionary<string, Type>
     {
@@ -19,13 +24,28 @@ public class DataProcess
         { "Products", typeof(Product) },
     };
 
-    public DataProcess(IServiceProvider serviceProvider, IdentityContext context, UserManager<ApplicationUser> userManager)
+    public DataProcess(IServiceProvider serviceProvider, IdentityContext context, UserManager<ApplicationUser> userManager, IEmaliSenderService emailSender)
     {
         _serviceProvider = serviceProvider;
         _context = context;
         _userManager = userManager;
+        _emailSender = emailSender;
     }
 
+    public async Task<ICollection<ApplicationUser>> GetAssignedusers(string jobname)
+    {
+
+        var taskdata = _context.TaskData
+            .Include(t => t.AssignedUsers)
+            .FirstOrDefault(x => x.TaskName == jobname);
+        if (taskdata != null)
+        {
+            var users = taskdata.AssignedUsers;
+
+            return users;
+        }
+        return null;
+    }
 
     public async Task InsertToTaskData(string jobname, string filepath, string tablename, ApplicationUser user, string description)
     {
@@ -73,6 +93,7 @@ public class DataProcess
     {
         try
         {
+            //var sendmail = applicationUser== null ? false : true;
 
             if (!ModelMap.TryGetValue(tableName, out Type modelType))
             {
@@ -95,6 +116,40 @@ public class DataProcess
         }
         catch { throw; }
     }
+
+    public async Task ExecuteJobAndNotify(string jobname, string filepath, string delimiter, bool hasheader, string tableName)
+    {
+        var usersAssignedToTask = await GetAssignedusers(jobname);
+        List<string> recipients = usersAssignedToTask.Select(x => x.Email).ToList();
+        try
+        {
+            await readAndInsert(filepath, delimiter, hasheader, tableName);
+            Console.WriteLine($"{jobname} executed successfully.");
+
+          //  var usersAssignedToTask = await GetAssignedusers(jobname);
+           // List<string> recipients =  usersAssignedToTask.Select(x => x.Email).ToList();
+
+            // Send email notification
+            await _emailSender.SendEmail(
+                recipients,
+                $"Job {jobname} Completed",
+                $"The scheduled job '{jobname}' has been successfully completed at {DateTime.Now}."
+            );
+
+            Console.WriteLine($"Email notification sent for {jobname}.");
+        }
+        catch (Exception ex)
+        {
+
+            await _emailSender.SendEmail(
+              recipients,
+              $"Job {jobname} Not Completed",
+              $"The scheduled job '{jobname}' has not Completed at  {DateTime.Now}. error:{ex.Message}"
+          );
+            Console.WriteLine($"Error while executing job {jobname}: {ex.Message}");
+        }
+    }
+
 
 
     public void readAndInsertWithoutDelete(string filepath, string delimiter, bool hasheader, string tableName)
