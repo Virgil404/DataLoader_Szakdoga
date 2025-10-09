@@ -9,7 +9,7 @@ namespace DataLoader.Services.InterFaces
 
         public Task<List<DetailedTaskDTO>> GetTasksAssignedToUser();
 
-        public Task CreateTask(string name , string cron , string folder, string delimiter , bool hasheader , string tablename, string description );
+        public Task CreateTask(string name , string cron , string folder, string delimiter , bool hasheader , string tablename, string description , bool emailOnSuccess);
 
         public Task DeleteTask(string jobID);
 

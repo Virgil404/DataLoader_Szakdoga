@@ -30,7 +30,8 @@ namespace DataLoader.Pages
         public bool retriggerlert { get; set; }
         public  bool BadAlert {  get; set; } 
         public bool UseCron { get; set; }
-       public DetailedTaskDTO task { get; set;}
+        public bool SendEmail { get; set; } = true;
+        public DetailedTaskDTO task { get; set;}
       public List<DetailedTaskDTO> tasks { get; set; }
       
        public DetailedTaskDTO TasksAssignedToCurrentuser { get; set; }
@@ -134,7 +135,7 @@ namespace DataLoader.Pages
          //   Console.WriteLine("Jobname:" +(Jobname==null));
 
 
-           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename,description);
+           await taskSchedulerService.CreateTask(Jobname, cron, filepath, delimiter, true, tablename,description,SendEmail);
             NotificationService.Notify(new NotificationMessage
             { Severity = NotificationSeverity.Success, Summary = "Task Created Successfully", Detail = $"{Jobname} created successfully", Duration = 6000 });
             //alert = true;

@@ -67,7 +67,10 @@
 					<label> TableName</label>
 					<InputText @bind-Value="tablename"></InputText>
 				</RadzenStack>
-
+				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
+					<label> Send Email On success</label>
+					<InputCheckbox @bind-Value="SendEmail"> SendSuccessEmail </InputCheckbox>
+				</RadzenStack>
 				<RadzenStack Orientation="Orientation.Vertical" Gap="4px">
 					<RadzenButton ButtonStyle="ButtonStyle.Primary" Style="margin-top: 25px;" Icon="add_circle" Text="Create Task" Click="createTask"> </RadzenButton>
 				</RadzenStack>

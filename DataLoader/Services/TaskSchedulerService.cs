@@ -48,12 +48,12 @@ namespace DataLoader.Services
         }
         */
 
-        public async Task CreateTask(string name, string _cron, string folder, string _delimiter, bool _hasheader, string tablename, string description)
+        public async Task CreateTask(string name, string _cron, string folder, string _delimiter, bool _hasheader, string tablename, string description, bool emailOnSuccess)
         {
             try
             {
                 var url = $"api/Hangfire/CreateTask?cron={Uri.EscapeDataString(_cron)}&jobname={Uri.EscapeDataString(name)}&filePath={Uri.EscapeDataString(folder)}" +
-                    $"&delimiter={Uri.EscapeDataString(_delimiter)}&hasheader={_hasheader}&tableName={Uri.EscapeDataString(tablename)}&description={Uri.EscapeDataString(description)}";
+                    $"&delimiter={Uri.EscapeDataString(_delimiter)}&hasheader={_hasheader}&tableName={Uri.EscapeDataString(tablename)}&description={Uri.EscapeDataString(description)}&emailOnSuccess={emailOnSuccess}";
 
                 var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
 

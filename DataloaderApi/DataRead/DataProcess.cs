@@ -47,7 +47,7 @@ public class DataProcess
         return null;
     }
 
-    public async Task InsertToTaskData(string jobname, string filepath, string tablename, ApplicationUser user, string description)
+    public async Task InsertToTaskData(string jobname, string filepath, string tablename, ApplicationUser user, string description, bool emailOnSuccess)
     {
 
         var taskdata = new TaskData
@@ -56,7 +56,9 @@ public class DataProcess
             sourceLocation = filepath,
             DestinationTable = tablename,
             AssignedUsers = new List<ApplicationUser> { user },
-            TaskDescription = description
+            TaskDescription = description,
+            isActive = emailOnSuccess
+
 
         };
 
@@ -75,7 +77,7 @@ public class DataProcess
         }
     }
 
-    public async Task UpdateTaskData(string jobname, string filepath, string tablename, string description)
+    public async Task UpdateTaskData(string jobname, string filepath, string tablename, string description, bool emailonSuccess)
     {
         var taskdata = _context.TaskData.Where(x => x.TaskName == jobname).FirstOrDefault();
         if (taskdata != null)
@@ -84,6 +86,7 @@ public class DataProcess
             taskdata.sourceLocation = filepath;
             taskdata.DestinationTable = tablename;
             taskdata.TaskDescription = description;
+            taskdata.isActive = emailonSuccess;
             await _context.SaveChangesAsync();
         }
     }
@@ -121,22 +124,29 @@ public class DataProcess
     {
         var usersAssignedToTask = await GetAssignedusers(jobname);
         List<string> recipients = usersAssignedToTask.Select(x => x.Email).ToList();
+        var emailonSuccess = _context.TaskData.Where(x => x.TaskName == jobname).Select(x => x.isActive).FirstOrDefault();
+
         try
         {
             await readAndInsert(filepath, delimiter, hasheader, tableName);
             Console.WriteLine($"{jobname} executed successfully.");
 
-          //  var usersAssignedToTask = await GetAssignedusers(jobname);
-           // List<string> recipients =  usersAssignedToTask.Select(x => x.Email).ToList();
+            //  var usersAssignedToTask = await GetAssignedusers(jobname);
+            // List<string> recipients =  usersAssignedToTask.Select(x => x.Email).ToList();
 
             // Send email notification
-            await _emailSender.SendEmail(
-                recipients,
-                $"Job {jobname} Completed",
-                $"The scheduled job '{jobname}' has been successfully completed at {DateTime.Now}."
-            );
+            if(emailonSuccess){
 
-            Console.WriteLine($"Email notification sent for {jobname}.");
+               await _emailSender.SendEmail(
+               recipients,
+               $"Job {jobname} Completed",
+               $"The scheduled job '{jobname}' has been successfully completed at {DateTime.Now}."
+                );
+
+                Console.WriteLine($"Email notification sent for {jobname}.");
+            }
+           
+
         }
         catch (Exception ex)
         {
